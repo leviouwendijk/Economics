@@ -33,6 +33,21 @@ public struct PlatformTransactions {
         return volume > 0 ? value / Double(volume) : 0
     }
 
+    public func fixedCost() -> Double {
+        return volume > 0 ? Double(volume) * fees.fixed : 0
+    }
+
+    public func variableCost() -> Double {
+        return averageValue() > 0 ? (averageValue() * (fees.percentage / 100)) * Double(volume) : 0
+    }
+
+    public func sumCost() -> Double {
+        return fixedCost() + variableCost()
+    }
+
+    public func profit() -> Double {
+        return sumValue() - sumCost()
+    }
 }
 
 public struct Result {
@@ -40,6 +55,12 @@ public struct Result {
     public let gross: Double
     public let cost: Double
     public let profit: Double
+}
+
+public enum CompareCriteria {
+    case profit
+    case transaction
+    case subscription
 }
 
 public struct PaymentProcessor {
@@ -58,25 +79,9 @@ public struct PaymentProcessor {
     }
 
     public static func calculate(config: Configuration, transactions: PlatformTransactions) -> Result {
-        func fixedCost() -> Double {
-            return transactions.volume > 0 ? Double(transactions.volume) * config.fees.fixed : 0
-        }
-
-        func variableCost() -> Double {
-            return transactions.averageValue() > 0 ? (transactions.averageValue() * (config.fees.percentage / 100)) * Double(transactions.volume) : 0
-        }
-
-        func sumCost() -> Double {
-            return fixedCost() + variableCost()
-        }
-
-        func profit() -> Double {
-            return transactions.sumValue() - sumCost()
-        }
-
         let gross = transactions.sumValue()
-        let cost = sumCost()
-        let profit = profit()
+        let cost = transactions.sumCost()
+        let profit = transactions.profit()
 
         return Result(
             name: config.name,
@@ -84,34 +89,5 @@ public struct PaymentProcessor {
             cost: config.rounding ? roundToTwoDecimals(cost) : cost,
             profit: config.rounding ? roundToTwoDecimals(profit) : profit
         )
-    }
-}
-
-public enum CompareCriteria {
-    case profit
-    case transaction
-    case subscription
-}
-
-public struct ComparePaymentProcessors {
-    public let configs: [PaymentProcessor.Configuration]
-    public let transactions: PlatformTransactions
-
-    public init(configs: [PaymentProcessor.Configuration], transactions: PlatformTransactions) {
-        self.configs = configs
-        self.transactions = transactions
-    }
-
-    public func best(criteria: CompareCriteria) -> Result? {
-        let results = configs.map { PaymentProcessor.calculate(config: $0, transactions: transactions) }
-
-        switch criteria {
-        case .profit:
-            return results.max(by: { $0.profit < $1.profit }) 
-        case .transaction:
-            return results.min(by: { $0.cost < $1.cost })
-        case .subscription:
-            return configs.min(by: { $0.fees.monthly < $1.fees.monthly }).map { PaymentProcessor.calculate(config: $0, transactions: transactions) }
-        }
     }
 }
