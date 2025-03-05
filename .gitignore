@@ -8,3 +8,5 @@ DerivedData/
 .netrc
 
 .index-build/
+libEconomics.dylib.dSYM/
+libEconomics.dylib*
