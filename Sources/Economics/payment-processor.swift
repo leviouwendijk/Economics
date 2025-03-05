@@ -4,25 +4,13 @@ public enum Period {
     case week, month, year
 }
 
-public struct PlatformTransactionFees {
-    public let fixed: Double
-    public let percentage: Double
-
-    public init(fixed: Double, percentage: Double) {
-        self.fixed = fixed
-        self.percentage = percentage
-    }
-}
-
 public struct PlatformTransactions {
     public let volume: Int
     public let value: Double
-    public let fees: PlatformTransactionFees
 
-    public init(volume: Int, value: Double, fees: PlatformTransactionFees) {
+    public init(volume: Int, value: Double) {
         self.volume = volume
         self.value = value
-        self.fees = fees
     }
 
     public func sumValue() -> Double {
