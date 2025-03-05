@@ -16,9 +16,11 @@ public struct Cost {
 
 public struct Costs {
     public let costs: [Cost]
+    public let rounding: Bool
 
-    public init(costs: [Cost]) {
+    public init(costs: [Cost], rounding: Bool = false) {
         self.costs = costs
+        self.rounding = rounding
     }
 
     public func fixed() -> Double {
@@ -26,7 +28,7 @@ public struct Costs {
         for i in costs where i.type == .fixed {
             output += i.value
         }
-        return output
+        return rounding ? roundToTwoDecimals(output) : output
     }
 
     public func variable(sales: Int) -> Double {
@@ -34,10 +36,11 @@ public struct Costs {
         for i in costs where i.type == .variable {
             output += (i.value * Double(sales))
         }
-        return output
+        return rounding ? roundToTwoDecimals(output) : output
     }
 
     public func total(sales: Int) -> Double {
-        return fixed() + variable(sales: sales)
+        let result = fixed() + variable(sales: sales)
+        return rounding ? roundToTwoDecimals(result) : result
     }
 }
