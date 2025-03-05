@@ -42,6 +42,10 @@ public struct Result {
     public let profit: Double
 }
 
+public enum CostType {
+    case fixed, variable 
+}
+
 public struct PaymentProcessor {
     public struct Configuration {
         public let name: String
@@ -58,16 +62,18 @@ public struct PaymentProcessor {
     }
 
     public static func calculate(config: Configuration, transactions: PlatformTransactions) -> Result {
-        func fixedCost() -> Double {
-            return transactions.volume > 0 ? Double(transactions.volume) * config.fees.fixed : 0
-        }
-
-        func variableCost() -> Double {
-            return transactions.averageValue() > 0 ? (transactions.averageValue() * (config.fees.percentage / 100)) * Double(transactions.volume) : 0
+        func transactionCost(_ type: CostType) -> Double {
+            // var output: Double = 0.0
+            switch type {
+                case .fixed: 
+                    return transactions.volume > 0 ? Double(transactions.volume) * config.fees.fixed : 0
+                case .variable:
+                return transactions.averageValue() > 0 ? (transactions.averageValue() * (config.fees.percentage / 100)) * Double(transactions.volume) : 0
+            }
         }
 
         func sumCost() -> Double {
-            return fixedCost() + variableCost()
+            return transactionCost(.fixed) + transactionCost(.variable) + config.fees.monthly
         }
 
         func profit() -> Double {
