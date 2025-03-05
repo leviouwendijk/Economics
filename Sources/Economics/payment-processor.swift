@@ -108,4 +108,29 @@ public struct ComparePaymentProcessors {
             return configs.min(by: { $0.fees.monthly < $1.fees.monthly }).map { PaymentProcessor.calculate(config: $0, transactions: transactions) }
         }
     }
+
+    public func rank(criteria: CompareCriteria) -> [Int: Result] {
+        let results = configs.map { PaymentProcessor.calculate(config: $0, transactions: transactions) }
+
+        let sortedResults: [Result]
+        switch criteria {
+        case .profit:
+            sortedResults = results.sorted { $0.profit > $1.profit }
+        case .transaction:
+            sortedResults = results.sorted { $0.cost < $1.cost }
+        case .subscription:
+            sortedResults = results.sorted { configA, configB in
+                let subA = configs.first(where: { $0.name == configA.name })?.fees.monthly ?? Double.greatestFiniteMagnitude
+                let subB = configs.first(where: { $0.name == configB.name })?.fees.monthly ?? Double.greatestFiniteMagnitude
+                return subA < subB
+            }
+        }
+
+        var rankedDictionary = [Int: Result]()
+        for (index, result) in sortedResults.enumerated() {
+            rankedDictionary[index + 1] = result
+        }
+
+        return rankedDictionary
+    }
 }
