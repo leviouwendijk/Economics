@@ -1,2 +1,5 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+import Foundation
+
+func roundToTwoDecimals(_ value: Double) -> Double {
+    return (value * 100).rounded() / 100
+}

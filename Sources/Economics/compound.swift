@@ -5,11 +5,13 @@ public struct CompoundValue {
         public let principal: Double
         public let annualRate: Double
         public let monthlyInvestment: Double
+        public let rounding: Bool
 
-        public init(principal: Double, annualRate: Double, monthlyInvestment: Double) {
+        public init(principal: Double, annualRate: Double, monthlyInvestment: Double, rounding: Bool = false) {
             self.principal = principal
             self.annualRate = annualRate
             self.monthlyInvestment = monthlyInvestment
+            self.rounding = rounding
         }
     }
 
@@ -24,6 +26,14 @@ public struct CompoundValue {
         let totalContribution = config.principal + (config.monthlyInvestment * Double(years))
         let totalReturn = amount - totalContribution
 
-        return (value: amount, invested: totalContribution, return: totalReturn)
+        if config.rounding {
+            return (
+                value: roundToTwoDecimals(amount),
+                invested: roundToTwoDecimals(totalContribution),
+                return: roundToTwoDecimals(totalReturn)
+            )
+        } else {
+            return (value: amount, invested: totalContribution, return: totalReturn)
+        }
     }
 }

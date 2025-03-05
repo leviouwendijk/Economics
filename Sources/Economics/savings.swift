@@ -4,10 +4,12 @@ public struct SavingsTarget {
     public struct Configuration {
         public let target: Double
         public let income: Double
+        public let rounding: Bool
 
-        public init(target: Double, income: Double) {
+        public init(target: Double, income: Double, rounding: Bool = false) {
             self.target = target
             self.income = income
+            self.rounding = rounding
         }
     }
 
@@ -19,6 +21,11 @@ public struct SavingsTarget {
 
     public static func saverate(config: Configuration, months: Int) -> Double {
         guard months > 0, config.income > 0 else { return 0 }
-        return (config.target / (config.income * Double(months))) * 100
+        let output = (config.target / (config.income * Double(months))) * 100
+        if config.rounding {
+            return roundToTwoDecimals(output)
+        } else {
+            return output
+        }
     }
 }
