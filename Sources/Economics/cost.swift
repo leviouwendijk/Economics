@@ -12,6 +12,10 @@ public struct Cost {
 public struct Costs {
     public let costs: [Cost]
 
+    public init(costs: [Cost]) {
+        self.costs = costs
+    }
+
     public func fixed() -> Double {
         var output = 0.0
         for i in costs where i.type == .fixed {
