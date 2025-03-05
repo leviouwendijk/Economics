@@ -30,10 +30,6 @@ public struct Result {
     public let profit: Double
 }
 
-public enum CostType {
-    case fixed, variable 
-}
-
 public struct PaymentProcessor {
     public struct Configuration {
         public let name: String
