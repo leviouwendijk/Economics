@@ -7,6 +7,11 @@ public enum CostType {
 public struct Cost {
     public let type: CostType
     public let value: Double
+
+    public init(type: CostType, value: Double) {
+        self.type = type
+        self.value = value
+    }
 }
 
 public struct Costs {
