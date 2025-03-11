@@ -52,7 +52,7 @@ public struct PaymentProcessor {
                 case .fixed: 
                     return transactions.volume > 0 ? Double(transactions.volume) * config.fees.fixed : 0
                 case .variable:
-                return transactions.averageValue() > 0 ? (transactions.averageValue() * (config.fees.percentage / 100)) * Double(transactions.volume) : 0
+                return transactions.sumValue() > 0 ? (transactions.sumValue() * (config.fees.percentage / 100)) : 0
             }
         }
 
