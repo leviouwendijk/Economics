@@ -22,8 +22,16 @@ public struct CompoundValue {
 
         let totalMonths = years * 12
 
+        // let compoundedPrincipal = config.principal * pow(1 + monthlyRate, Double(totalMonths))
+        // let compoundedContributions = config.monthlyInvestment * ((pow(1 + monthlyRate, Double(totalMonths)) - 1) / monthlyRate)
+
+        // for _ in 1...totalMonths {
+        //     amount = (amount * (1 + monthlyRate)) + config.monthlyInvestment
+        // }
+
         for _ in 1...totalMonths {
-            amount = (amount * (1 + monthlyRate)) + config.monthlyInvestment
+            amount *= (1 + monthlyRate) // Apply interest to the current total
+            amount += config.monthlyInvestment // Add monthly contribution
         }
 
         let totalContribution = config.principal + (config.monthlyInvestment * Double(totalMonths))
