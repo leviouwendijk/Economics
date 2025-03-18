@@ -17,13 +17,16 @@ public struct CompoundValue {
 
     public static func value(config: Configuration, years: Int) -> (value: Double, invested: Double, return: Double) {
         let rateDecimal = config.annualRate / 100.0
+        let monthlyRate = rateDecimal / 12.0
         var amount = config.principal
 
-        for _ in 1...years {
-            amount = (amount * (1 + rateDecimal)) + config.monthlyInvestment
+        let totalMonths = years * 12
+
+        for _ in 1...totalMonths {
+            amount = (amount * (1 + monthlyRate)) + config.monthlyInvestment
         }
 
-        let totalContribution = config.principal + (config.monthlyInvestment * Double(years))
+        let totalContribution = config.principal + (config.monthlyInvestment * Double(totalMonths))
         let totalReturn = amount - totalContribution
 
         if config.rounding {
