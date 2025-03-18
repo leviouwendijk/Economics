@@ -1,8 +1,10 @@
 import Foundation
 
-public enum CompoundTime {
+public enum CompoundTime: String, Identifiable, CaseIterable {
     case beginning
     case end
+
+    public var id: String { self.rawValue }
 }
 
 public struct CompoundValue {
