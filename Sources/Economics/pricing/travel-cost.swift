@@ -1,6 +1,6 @@
 import Foundation
 
-public enum TravelCostRateType {
+public enum TravelCostRateType: CaseIterable {
     case travel
     case time
 }
@@ -36,6 +36,10 @@ public struct TravelCost {
         self.roundTrip = roundTrip
     }
 
+    public func traveledHours() -> Double {
+        return kilometers / speed
+    }
+
     public func calculate(for type: TravelCostRateType) -> Double {
         var result = 0.0
         switch type {
@@ -48,8 +52,12 @@ public struct TravelCost {
         return roundTrip ? (result * 2) : result
     }
 
-    public func traveledHours() -> Double {
-        return kilometers / speed
+    public func total() -> Double {
+        var sum = 0.0
+        for c in TravelCostRateType.allCases {
+            sum += calculate(for: c)
+        }
+        return sum
     }
 }
 
