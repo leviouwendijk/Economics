@@ -51,6 +51,25 @@ public struct SessionCountEstimation {
         self.suggestion = suggestion
     }
 
+    public init(
+        prognosisCount: Int,
+        prognosisLocal: Int,
+        suggestionCount: Int,
+        suggestionLocal: Int,
+    ) throws {
+        self.prognosis = try SessionCountEstimationObject(
+            type: .prognosis,
+            count: prognosisCount,
+            local: prognosisLocal
+        )
+
+        self.suggestion = try SessionCountEstimationObject(
+            type: .suggestion,
+            count: suggestionCount,
+            local: suggestionLocal
+        )
+    }
+
     public func count(for type: SessionCountEstimationType) -> Int {
         switch type {
             case .prognosis:  
