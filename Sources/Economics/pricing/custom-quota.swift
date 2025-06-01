@@ -1,16 +1,5 @@
 import Foundation
 
-// public enum QuotaTierError: Error, LocalizedError {
-//     case missingEstimationType(tier: QuotaTierType)
-
-//     public var errorDescription: String? {
-//         switch self {
-//         case .missingEstimationType(let tier):
-//             return "Missing SessionCountEstimationType for tier “\(tier.rawValue.capitalized)”."
-//         }
-//     }
-// }
-
 public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable {
     case local
     case combined
@@ -23,9 +12,9 @@ public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable {
             case .combined:
             switch type {
                 case .prognosis:
-                return estimation.prognosis.local
+                return estimation.prognosis.count - estimation.prognosis.local
                 case .suggestion:
-                return estimation.suggestion.local
+                return estimation.suggestion.count - estimation.suggestion.local
             }
             case .remote:
             switch type {
