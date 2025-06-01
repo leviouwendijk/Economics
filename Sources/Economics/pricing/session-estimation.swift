@@ -25,10 +25,6 @@ public struct SessionCountEstimationObject {
         return Double(count)
     }
 
-// if combined, we use the local specifier
-// local case overrides to all local
-// remote case overrides to all remote
-
     public init(
         type: SessionCountEstimationType,
         count: Int,
