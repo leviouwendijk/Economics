@@ -1,6 +1,6 @@
 import Foundation
 
-public enum QuotaTierType: CaseIterable {
+public enum QuotaTierType: String, CaseIterable, RawRepresentable {
     case local
     case combined
     case remote
