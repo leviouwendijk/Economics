@@ -79,7 +79,11 @@ public struct CustomQuota {
 
         let prognosis = baseRate.prognosis + cost.prognosis
         let suggestion = baseRate.suggestion + cost.suggestion
-        let avgCost = (cost.prognosis + cost.suggestion) / 2.0
+
+        let meanSessions = (Double(estimation.prognosis.count) + Double(estimation.suggestion.count)) / 2.0
+        let meanCost = (cost.prognosis + cost.suggestion) / 2.0
+        let avgCost = meanCost / meanSessions
+
         let basePrice = tier == .combined ? (baseRate.base + avgCost) : (baseRate.base + cost.base)
 
         return QuotaTierRate(
