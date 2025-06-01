@@ -84,25 +84,40 @@ public struct CustomQuota {
         )
     }
 
+    public func tier(for tier: QuotaTierType) -> QuotaTierContent {
+        return QuotaTierContent(
+            tier: tier,
+            base: base(for: tier),
+            cost: cost(for: tier),
+            price: price(for: tier)
+        )
+    }
+
+    public func tiers() -> [QuotaTierContent] {
+        var tiers: [QuotaTierContent] = []
+        for t in QuotaTierType.allCases {
+            tiers.append(tier(for: t))
+        }
+        return tiers
+    }
 }
 
-// tier: remote
-// estimation: prognosis = 5, suggestion = 3
-// local: 2 -- if 
-
-public struct QuotaTierPrice {
-    public let prognosis: Double
-    public let suggestion: Double
-    public let base: Double
+public struct QuotaTierContent {
+    public let tier: QuotaTierType
+    public let base: QuotaTierRate
+    public let cost: QuotaTierRate
+    public let price: QuotaTierRate
 
     public init(
-        prognosis: Double,
-        suggestion: Double,
-        base: Double,
+        tier: QuotaTierType,
+        base: QuotaTierRate,
+        cost: QuotaTierRate,
+        price: QuotaTierRate
     ) {
-        self.prognosis = prognosis
-        self.suggestion = suggestion
+        self.tier = tier
         self.base = base
+        self.cost = cost
+        self.price = price
     }
 }
 
@@ -122,37 +137,35 @@ public struct QuotaTierRate {
     }
 }
 
-public struct QuotaTierInput {
-    public let base: Double
-    public let tier: QuotaTierType
-    public let estimation: SessionCountEstimation
+// public struct QuotaTierInput {
+//     public let base: Double
+//     public let tier: QuotaTierType
+//     public let estimation: SessionCountEstimation
     
-    // private let local: Int {
-    //     switch tier {
-    //         case .local:
-    //         return 
+//     // private let local: Int {
+//     //     switch tier {
+//     //         case .local:
+//     //         return 
 
-    //     }
-    // }
+//     //     }
+//     // }
 
-    public init(
-        base: Double,
-        tier: QuotaTierType,
-        estimation: SessionCountEstimation,
-    ) {
-        self.base = base
-        self.tier = tier
-        self.estimation = estimation
-    }
+//     public init(
+//         base: Double,
+//         tier: QuotaTierType,
+//         estimation: SessionCountEstimation,
+//     ) {
+//         self.base = base
+//         self.tier = tier
+//         self.estimation = estimation
+//     }
 
-    public func price() -> QuotaTierPrice {
-        return QuotaTierPrice(
-            prognosis: estimation.prognosis.double * base,
-            suggestion: estimation.suggestion.double * base,
-            base: base
-        ) 
+//     public func price() -> QuotaTierPrice {
+//         return QuotaTierPrice(
+//             prognosis: estimation.prognosis.double * base,
+//             suggestion: estimation.suggestion.double * base,
+//             base: base
+//         ) 
 
-    }
-}
-
-
+//     }
+// }
