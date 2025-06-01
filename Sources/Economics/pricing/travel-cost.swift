@@ -27,8 +27,8 @@ public struct TravelCost {
     public init(
         kilometers: Double,
         speed: Double = 80.0,
-        rates: TravelCostRates,
-        roundTrip: Bool
+        rates: TravelCostRates = TravelCostRates(travel: 0.25, time: 105),
+        roundTrip: Bool = true
     ) {
         self.kilometers = kilometers
         self.speed = speed
@@ -37,12 +37,15 @@ public struct TravelCost {
     }
 
     public func calculate(for type: TravelCostRateType) -> Double {
+        var result = 0.0
         switch type {
             case .travel: 
-            return rates.travel * kilometers
+            result = rates.travel * kilometers
             case .time:
-            return rates.time * traveledHours()
+            result = rates.time * traveledHours()
         }
+
+        return roundTrip ? (result * 2) : result
     }
 
     public func traveledHours() -> Double {
