@@ -1,6 +1,17 @@
 import Foundation
 
-public enum QuotaTierType: String, CaseIterable, RawRepresentable {
+// public enum QuotaTierError: Error, LocalizedError {
+//     case missingEstimationType(tier: QuotaTierType)
+
+//     public var errorDescription: String? {
+//         switch self {
+//         case .missingEstimationType(let tier):
+//             return "Missing SessionCountEstimationType for tier “\(tier.rawValue.capitalized)”."
+//         }
+//     }
+// }
+
+public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable {
     case local
     case combined
     case remote
@@ -43,6 +54,10 @@ public struct CustomQuota {
     }
 
     public func cost(for tier: QuotaTierType) -> QuotaTierRate {
+        guard tier != .local else {
+            return QuotaTierRate(prognosis: 0, suggestion: 0, base: 0)
+        }
+
         let cost = travelCost.total()
         
         let prog = tier.travelable(in: estimation, for: .prognosis)
