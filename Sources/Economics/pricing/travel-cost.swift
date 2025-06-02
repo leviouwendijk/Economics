@@ -1,11 +1,11 @@
 import Foundation
 
-public enum TravelCostRateType: CaseIterable {
+public enum TravelCostRateType: CaseIterable, Sendable {
     case travel
     case time
 }
 
-public struct TravelCostRates {
+public struct TravelCostRates: Sendable {
     public let travel: Double
     public let time: Double
 
@@ -18,7 +18,7 @@ public struct TravelCostRates {
     }
 }
 
-public struct TravelCost {
+public struct TravelCost: Sendable {
     public let kilometers: Double
     public let speed: Double
     public let rates: TravelCostRates

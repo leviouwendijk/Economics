@@ -1,0 +1,141 @@
+import Foundation
+
+public enum InputConversionError: Error {
+    case invalidNumber(String)
+}
+
+public struct TravelCostRatesInputs {
+    public let travel: String
+    public let time: String
+
+    public init(
+        travel: String,
+        time: String
+    ) {
+        self.travel = travel
+        self.time = time
+    }
+
+    public func travelCostRates() throws -> TravelCostRates {
+        guard let tra = Double(travel) else {
+            throw InputConversionError.invalidNumber("‘\(travel)’ is not a number")
+        }
+        guard let ti = Double(time) else {
+            throw InputConversionError.invalidNumber("‘\(time)’ is not a number")
+        }
+        return TravelCostRates(
+            travel: tra,
+            time: ti
+        )
+    }
+}
+
+public struct TravelCostInputs {
+    public let kilometers: String
+    public let speed: String
+    public let rates: TravelCostRatesInputs
+    public let roundTrip: Bool
+
+    public init(
+        kilometers: String,
+        speed: String = "80.0",
+        rates: TravelCostRatesInputs = TravelCostRatesInputs(travel: "0.25", time: "105"),
+        roundTrip: Bool = true
+    ) {
+        self.kilometers = kilometers
+        self.speed = speed
+        self.rates = rates
+        self.roundTrip = roundTrip
+    }
+
+    public func travelCost() throws -> TravelCost {
+        guard let km = Double(kilometers) else {
+            throw InputConversionError.invalidNumber("‘\(kilometers)’ is not a number")
+        }
+        guard let sp = Double(speed) else {
+            throw InputConversionError.invalidNumber("‘\(speed)’ is not a number")
+        }
+
+        let ra = try rates.travelCostRates()
+
+        return TravelCost(
+            kilometers: km,
+            speed: sp,
+            rates: ra,
+            roundTrip: roundTrip
+        )
+    }
+}
+
+public struct SessionCountEstimationInputs {
+    public var type: SessionCountEstimationType
+    public var count: String
+    public var local: String
+
+    public init(
+        type: SessionCountEstimationType,
+        count: String,
+        local: String
+    )
+    {
+        self.type = type
+        self.count = count
+        self.local = local
+    }
+
+    public func sessionCountEstimation() throws -> SessionCountEstimationObject {
+        guard let co = Int(count) else {
+            throw InputConversionError.invalidNumber("‘\(count)’ is not a number")
+        }
+
+        guard let loc = Int(local) else {
+            throw InputConversionError.invalidNumber("‘\(local)’ is not a number")
+        }
+
+        return try SessionCountEstimationObject(
+            type: type,
+            count: co,
+            local: loc
+        )
+    }
+}
+
+public struct CustomQuotaInputs {
+    public var base: String
+    public var prognosis: SessionCountEstimationInputs
+    public var suggestion: SessionCountEstimationInputs
+    public var travelCost: TravelCostInputs
+
+    public init(
+        base: String,
+        prognosis: SessionCountEstimationInputs,
+        suggestion: SessionCountEstimationInputs,
+        travelCost: TravelCostInputs
+    )
+    {
+        self.base = base
+        self.prognosis = prognosis
+        self.suggestion = suggestion
+        self.travelCost = travelCost
+    }
+
+    public func customQuotaEstimation() throws -> CustomQuota {
+        guard let ba = Double(base) else {
+            throw InputConversionError.invalidNumber("‘\(base)’ is not a number")
+        }
+
+        let prog = try prognosis.sessionCountEstimation()
+        let sugg = try suggestion.sessionCountEstimation()
+        let trav = try travelCost.travelCost()
+        let esti = SessionCountEstimation(
+            prognosis: prog,
+            suggestion: sugg
+        )
+
+        return CustomQuota(
+            base: ba,
+            travelCost: trav,
+            estimation: esti
+        )
+    }
+}

@@ -1,6 +1,6 @@
 import Foundation
 
-public enum SessionCountEstimationError: Error, LocalizedError {
+public enum SessionCountEstimationError: Error, LocalizedError, Sendable {
     case localExceedsCount(count: Int, local: Int)
 
     public var errorDescription: String? {
@@ -11,12 +11,12 @@ public enum SessionCountEstimationError: Error, LocalizedError {
     }
 }
 
-public enum SessionCountEstimationType: CaseIterable {
+public enum SessionCountEstimationType: CaseIterable, Sendable {
     case prognosis
     case suggestion
 }
 
-public struct SessionCountEstimationObject {
+public struct SessionCountEstimationObject: Sendable {
     public let type: SessionCountEstimationType
     public let count: Int
     public let local: Int
@@ -39,7 +39,7 @@ public struct SessionCountEstimationObject {
     }
 }
 
-public struct SessionCountEstimation {
+public struct SessionCountEstimation: Sendable {
     public let prognosis: SessionCountEstimationObject
     public let suggestion: SessionCountEstimationObject
 

@@ -27,7 +27,7 @@ public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable {
     }
 }
 
-public struct CustomQuota {
+public struct CustomQuota: Sendable {
     public let base: Double
     public let travelCost: TravelCost
     public let estimation: SessionCountEstimation 
@@ -116,7 +116,7 @@ public struct CustomQuota {
     }
 }
 
-public struct QuotaTierContent {
+public struct QuotaTierContent: Sendable {
     public let tier: QuotaTierType
     public let base: QuotaTierRate
     public let cost: QuotaTierRate
@@ -135,7 +135,7 @@ public struct QuotaTierContent {
     }
 }
 
-public struct QuotaTierRate {
+public struct QuotaTierRate: Sendable {
     public let prognosis: Double
     public let suggestion: Double
     public let base: Double
@@ -151,35 +151,22 @@ public struct QuotaTierRate {
     }
 }
 
-// public struct QuotaTierInput {
-//     public let base: Double
-//     public let tier: QuotaTierType
-//     public let estimation: SessionCountEstimation
+public func quota(
+    kilometers: Double,
+    prognosis: (Int, Int),
+    suggestion: (Int, Int),
+    base: Double
+) throws -> CustomQuota {
+    let travelCost = TravelCost(kilometers: kilometers)
+    let prog = try SessionCountEstimationObject(type: .prognosis, count: prognosis.0, local: prognosis.1)
+    let sugg = try SessionCountEstimationObject(type: .suggestion, count: suggestion.0, local: suggestion.1)
+    let estimation = SessionCountEstimation(prognosis: prog, suggestion: sugg)
+
+    let quota = CustomQuota(
+        base: 350,
+        travelCost: travelCost,
+        estimation: estimation
+    )
     
-//     // private let local: Int {
-//     //     switch tier {
-//     //         case .local:
-//     //         return 
-
-//     //     }
-//     // }
-
-//     public init(
-//         base: Double,
-//         tier: QuotaTierType,
-//         estimation: SessionCountEstimation,
-//     ) {
-//         self.base = base
-//         self.tier = tier
-//         self.estimation = estimation
-//     }
-
-//     public func price() -> QuotaTierPrice {
-//         return QuotaTierPrice(
-//             prognosis: estimation.prognosis.double * base,
-//             suggestion: estimation.suggestion.double * base,
-//             base: base
-//         ) 
-
-//     }
-// }
+    return quota
+}
