@@ -5,8 +5,8 @@ public enum InputConversionError: Error {
 }
 
 public struct TravelCostRatesInputs {
-    public let travel: String
-    public let time: String
+    public var travel: String
+    public var time: String
 
     public init(
         travel: String,
@@ -31,10 +31,10 @@ public struct TravelCostRatesInputs {
 }
 
 public struct TravelCostInputs {
-    public let kilometers: String
-    public let speed: String
-    public let rates: TravelCostRatesInputs
-    public let roundTrip: Bool
+    public var kilometers: String
+    public var speed: String
+    public var rates: TravelCostRatesInputs
+    public var roundTrip: Bool
 
     public init(
         kilometers: String,
