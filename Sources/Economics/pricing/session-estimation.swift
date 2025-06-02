@@ -25,6 +25,10 @@ public struct SessionCountEstimationObject: Sendable {
         return Double(count)
     }
 
+    public var remote: Int {
+        return count - local
+    }
+
     public init(
         type: SessionCountEstimationType,
         count: Int,
