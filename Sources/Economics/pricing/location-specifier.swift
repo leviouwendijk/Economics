@@ -39,11 +39,23 @@ public struct SessionLocationString {
     }
 
     public init(
+        for tier: QuotaTierType,
         estimationObject: SessionCountEstimationObject,
         strings: SessionLocationStringSpecifier = SessionLocationStringSpecifier()
     ) {
         self.total = estimationObject.count
-        self.local = estimationObject.local
+
+        var l: Int 
+        switch tier {
+            case .local: 
+            l = estimationObject.count
+            case .combined:
+            l = estimationObject.local
+            case .remote:
+            l = 0
+        }
+        self.local = l
+
         self.strings = strings
     }
 
