@@ -39,14 +39,11 @@ public class QuotaViewModel: ObservableObject {
           .sink { [weak self] inputs in
               guard let self = self else { return }
 
-              // 1) Immediately show the spinner on main:
               self.isLoading = true
               self.loadedQuota = nil
 
-              // 2) Offload the *entire* parsing + construction to a background queue:
               DispatchQueue.global(qos: .userInitiated).async {
                   do {
-                      // ← runs off‐main:
                       let q = try inputs.customQuotaEstimation()
                       DispatchQueue.main.async {
                           // ← now back on main to update the UI
@@ -63,23 +60,4 @@ public class QuotaViewModel: ObservableObject {
           }
           .store(in: &cancellables)
     }
-    
-    // private func computeQuotaFromInputs(_ inputs: CustomQuotaInputs) {
-    //     do {
-    //         let q = try inputs.customQuotaEstimation()
-
-    //         self.isLoading = true
-    //         self.loadedQuota = nil
-
-    //         DispatchQueue.global(qos: .userInitiated).async {
-    //             DispatchQueue.main.async {
-    //                 self.loadedQuota = q
-    //                 self.isLoading = false
-    //             }
-    //         }
-    //     }
-    //     catch {
-    //         self.loadedQuota = nil
-    //     }
-    // }
 }
