@@ -34,30 +34,51 @@ public class QuotaViewModel: ObservableObject {
             )
         )
     
-        $customQuotaInputs
-          .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
-          .sink { [weak self] inputs in
-              guard let self = self else { return }
+        // $customQuotaInputs
+        //   .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+        //   .sink { [weak self] inputs in
+        //       guard let self = self else { return }
 
-              self.isLoading = true
-              self.loadedQuota = nil
+        //       self.isLoading = true
+        //       self.loadedQuota = nil
 
-              DispatchQueue.global(qos: .userInitiated).async {
-                  do {
-                      let q = try inputs.customQuotaEstimation()
-                      DispatchQueue.main.async {
-                          // ← now back on main to update the UI
-                          self.loadedQuota = q
-                          self.isLoading = false
-                      }
-                  } catch {
-                      DispatchQueue.main.async {
-                          self.loadedQuota = nil
-                          self.isLoading = false
-                      }
-                  }
-              }
-          }
-          .store(in: &cancellables)
+        //       DispatchQueue.global(qos: .userInitiated).async {
+        //           do {
+        //               let q = try inputs.customQuotaEstimation()
+        //               DispatchQueue.main.async {
+        //                   // ← now back on main to update the UI
+        //                   self.loadedQuota = q
+        //                   self.isLoading = false
+        //               }
+        //           } catch {
+        //               DispatchQueue.main.async {
+        //                   self.loadedQuota = nil
+        //                   self.isLoading = false
+        //               }
+        //           }
+        //       }
+        //   }
+        //   .store(in: &cancellables)
+    }
+
+    public func compute() {
+        isLoading = true
+        loadedQuota = nil
+        
+        let inputs = self.customQuotaInputs
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let q = try inputs.customQuotaEstimation()
+                DispatchQueue.main.async {
+                    self.loadedQuota = q
+                    self.isLoading = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.loadedQuota = nil
+                    self.isLoading = false
+                }
+            }
+        }
     }
 }
