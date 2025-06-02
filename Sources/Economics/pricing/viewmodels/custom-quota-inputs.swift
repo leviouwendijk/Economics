@@ -1,10 +1,10 @@
 import Foundation
 
-public enum InputConversionError: Error {
+public enum InputConversionError: Error, Sendable {
     case invalidNumber(String)
 }
 
-public struct TravelCostRatesInputs {
+public struct TravelCostRatesInputs: Sendable {
     public var travel: String
     public var time: String
 
@@ -30,7 +30,7 @@ public struct TravelCostRatesInputs {
     }
 }
 
-public struct TravelCostInputs {
+public struct TravelCostInputs: Sendable {
     public var kilometers: String
     public var speed: String
     public var rates: TravelCostRatesInputs
@@ -67,7 +67,7 @@ public struct TravelCostInputs {
     }
 }
 
-public struct SessionCountEstimationInputs {
+public struct SessionCountEstimationInputs: Sendable {
     public var type: SessionCountEstimationType
     public var count: String
     public var local: String
@@ -100,7 +100,7 @@ public struct SessionCountEstimationInputs {
     }
 }
 
-public struct CustomQuotaInputs {
+public struct CustomQuotaInputs: Sendable {
     public var base: String
     public var prognosis: SessionCountEstimationInputs
     public var suggestion: SessionCountEstimationInputs

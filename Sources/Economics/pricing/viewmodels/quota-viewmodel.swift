@@ -35,30 +35,51 @@ public class QuotaViewModel: ObservableObject {
         )
     
         $customQuotaInputs
-            // Debounce so we only fire 200ms after the user stops typing any field:
-            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
-            .sink { [weak self] inputs in
-                self?.computeQuotaFromInputs(inputs)
-            }
-            .store(in: &cancellables)
+          .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+          .sink { [weak self] inputs in
+              guard let self = self else { return }
+
+              // 1) Immediately show the spinner on main:
+              self.isLoading = true
+              self.loadedQuota = nil
+
+              // 2) Offload the *entire* parsing + construction to a background queue:
+              DispatchQueue.global(qos: .userInitiated).async {
+                  do {
+                      // ← runs off‐main:
+                      let q = try inputs.customQuotaEstimation()
+                      DispatchQueue.main.async {
+                          // ← now back on main to update the UI
+                          self.loadedQuota = q
+                          self.isLoading = false
+                      }
+                  } catch {
+                      DispatchQueue.main.async {
+                          self.loadedQuota = nil
+                          self.isLoading = false
+                      }
+                  }
+              }
+          }
+          .store(in: &cancellables)
     }
     
-    private func computeQuotaFromInputs(_ inputs: CustomQuotaInputs) {
-        do {
-            let q = try inputs.customQuotaEstimation()
+    // private func computeQuotaFromInputs(_ inputs: CustomQuotaInputs) {
+    //     do {
+    //         let q = try inputs.customQuotaEstimation()
 
-            self.isLoading = true
-            self.loadedQuota = nil
+    //         self.isLoading = true
+    //         self.loadedQuota = nil
 
-            DispatchQueue.global(qos: .userInitiated).async {
-                DispatchQueue.main.async {
-                    self.loadedQuota = q
-                    self.isLoading = false
-                }
-            }
-        }
-        catch {
-            self.loadedQuota = nil
-        }
-    }
+    //         DispatchQueue.global(qos: .userInitiated).async {
+    //             DispatchQueue.main.async {
+    //                 self.loadedQuota = q
+    //                 self.isLoading = false
+    //             }
+    //         }
+    //     }
+    //     catch {
+    //         self.loadedQuota = nil
+    //     }
+    // }
 }
