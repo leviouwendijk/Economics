@@ -38,6 +38,16 @@ public struct SessionLocationString {
         self.strings = strings
     }
 
+    public init(
+        estimationObject: SessionCountEstimationObject,
+        strings: SessionLocationStringSpecifier = SessionLocationStringSpecifier()
+    ) {
+        self.total = estimationObject.count
+        self.local = estimationObject.local
+        self.strings = strings
+    }
+
+
     public func split(for location: SessionLocation) -> String {
         let includeNumber = total > 1 ? true : false
 
