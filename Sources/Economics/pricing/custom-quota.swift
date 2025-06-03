@@ -120,6 +120,14 @@ public struct CustomQuota: Sendable {
             for: 
                 \(travelCost.traveledHours()) hours
         using base rate: \(base)
+
+        estimation:
+            prognosis: \(estimation.prognosis.count) sessions
+                of which remote: \(estimation.prognosis.remote)
+                of which local: \(estimation.prognosis.local)
+            suggestion: \(estimation.suggestion.count) sessions
+                of which remote: \(estimation.suggestion.remote)
+                of which local: \(estimation.suggestion.local)
         """
     }
 
