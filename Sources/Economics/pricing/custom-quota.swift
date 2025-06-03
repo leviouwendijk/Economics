@@ -110,7 +110,7 @@ public struct CustomQuota: Sendable {
         return tiers
     }
 
-    public func inputs(for clientIdentifier: String?) -> String {
+    public func inputs(for clientIdentifier: String? = nil) -> String {
         var str = ""
 
         if let client = clientIdentifier {
@@ -141,21 +141,21 @@ public struct CustomQuota: Sendable {
         return str
     }
 
-    public func tierSummary(for tier: QuotaTierType) -> String {
+    public func tierSummary(for tier: QuotaTierType, clientIdentifier: String? = nil) -> String {
         let content = self.tier(for: tier)
 
         return """
         \(content.string())
 
-        \(self.inputs())
+        \(self.inputs(for: clientIdentifier))
         """
     }
 
-    public func quotaSummary() -> String {
+    public func quotaSummary(clientIdentifier: String? = nil) -> String {
         let contents = self.tiers()
 
         return """
-        \(self.inputs())
+        \(self.inputs(for: clientIdentifier))
 
         \(contents.table())
         """
