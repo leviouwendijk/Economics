@@ -127,7 +127,7 @@ public struct CustomQuotaInputs: Sendable {
         let prog = try prognosis.sessionCountEstimation()
         let sugg = try suggestion.sessionCountEstimation()
         let trav = try travelCost.travelCost()
-        let esti = SessionCountEstimation(
+        let esti = try SessionCountEstimation(
             prognosis: prog,
             suggestion: sugg
         )

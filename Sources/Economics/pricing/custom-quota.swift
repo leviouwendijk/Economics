@@ -155,7 +155,7 @@ public func quota(
     let travelCost = TravelCost(kilometers: kilometers)
     let prog = try SessionCountEstimationObject(type: .prognosis, count: prognosis.0, local: prognosis.1)
     let sugg = try SessionCountEstimationObject(type: .suggestion, count: suggestion.0, local: suggestion.1)
-    let estimation = SessionCountEstimation(prognosis: prog, suggestion: sugg)
+    let estimation = try SessionCountEstimation(prognosis: prog, suggestion: sugg)
 
     let quota = CustomQuota(
         base: 350,
