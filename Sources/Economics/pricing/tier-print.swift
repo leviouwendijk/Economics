@@ -70,24 +70,34 @@ extension Array where Element == QuotaTierContent {
 
         for row in rows {
             for (i, cell) in row.enumerated() {
-                let length = cell.count
-                if length > maxWidths[i] {
-                    maxWidths[i] = length
+                if cell.count > maxWidths[i] {
+                    maxWidths[i] = cell.count
                 }
             }
         }
 
         var lines: [String] = []
-        for row in rows {
+
+        let padBetween = String(repeating: " ", count: padding)
+        let headerCells = zip(rows[0], maxWidths).map { (cell, width) -> String in
+            let extra = width - cell.count
+            let left = extra / 2
+            let right = extra - left
+            return String(repeating: " ", count: left)
+                 + cell
+                 + String(repeating: " ", count: right)
+        }
+        lines.append(headerCells.joined(separator: padBetween))
+
+        for rowIndex in 1..<rows.count {
+            let row = rows[rowIndex]
             var paddedCells: [String] = []
             for (i, cell) in row.enumerated() {
                 let paddingNeeded = maxWidths[i] - cell.count
-                let padded = cell + String(repeating: " ", count: paddingNeeded)
-                paddedCells.append(padded)
+                let leftAligned = cell + String(repeating: " ", count: paddingNeeded)
+                paddedCells.append(leftAligned)
             }
-            let pad = String(repeating: " ", count: padding)
-            let line = paddedCells.joined(separator: pad)
-            lines.append(line)
+            lines.append(paddedCells.joined(separator: padBetween))
         }
 
         return lines.joined(separator: "\n")
