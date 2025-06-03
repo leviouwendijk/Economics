@@ -2,11 +2,14 @@ import Foundation
 
 public enum SessionCountEstimationError: Error, LocalizedError, Sendable {
     case localExceedsCount(count: Int, local: Int)
+    case suggestionExceedsPrognosis(prognosis: Int, suggestion: Int)
 
     public var errorDescription: String? {
         switch self {
         case let .localExceedsCount(count, local):
             return "Invalid SessionCountEstimationObject: local (\(local)) cannot exceed count (\(count))."
+        case let .suggestionExceedsPrognosis(prognosis, suggestion):
+            return "Invalid SessionCountEstimationObject: prognosis (\(prognosis)) cannot exceed count (\(suggestion))."
         }
     }
 }
@@ -50,7 +53,13 @@ public struct SessionCountEstimation: Sendable {
     public init(
         prognosis: SessionCountEstimationObject,
         suggestion: SessionCountEstimationObject,
-    ) {
+    ) throws {
+        guard !(suggestion.count > prognosis.count) else {
+            throw SessionCountEstimationError.suggestionExceedsPrognosis(
+                prognosis: prognosis.count,
+                suggestion: suggestion.count
+            )
+        }
         self.prognosis = prognosis
         self.suggestion = suggestion
     }
@@ -61,16 +70,19 @@ public struct SessionCountEstimation: Sendable {
         suggestionCount: Int,
         suggestionLocal: Int,
     ) throws {
-        self.prognosis = try SessionCountEstimationObject(
+        let prognosis = try SessionCountEstimationObject(
             type: .prognosis,
             count: prognosisCount,
             local: prognosisLocal
         )
-
-        self.suggestion = try SessionCountEstimationObject(
+        let suggestion = try SessionCountEstimationObject(
             type: .suggestion,
             count: suggestionCount,
             local: suggestionLocal
+        )
+        try self.init(
+            prognosis: prognosis, 
+            suggestion: suggestion
         )
     }
 
