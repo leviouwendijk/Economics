@@ -110,8 +110,15 @@ public struct CustomQuota: Sendable {
         return tiers
     }
 
-    public func inputs() -> String {
-        return """
+    public func inputs(for clientIdentifier: String?) -> String {
+        var str = ""
+
+        if let client = clientIdentifier {
+            str.append(client)
+            str.append("\n")
+        }
+
+        let settings = """
         kilometers: \(travelCost.kilometers)
             at:
                 \(travelCost.rates.time) / hr
@@ -129,6 +136,9 @@ public struct CustomQuota: Sendable {
                 of which remote: \(estimation.suggestion.remote)
                 of which local: \(estimation.suggestion.local)
         """
+
+        str.append(settings)
+        return str
     }
 
     public func tierSummary(for tier: QuotaTierType) -> String {
