@@ -18,8 +18,6 @@ extension Array where Element == QuotaTierContent {
         includeCost: Bool = true,
         includeBase: Bool = true,
         padding: Int = 8,
-        /// If `true`, each cell shows the full “prognosis/suggestion/base” text;
-        /// if `false`, it shows only the `suggestion`.
         showAllFields: Bool = false
     ) -> String {
         let contentsByTier: [QuotaTierType: QuotaTierContent] =
@@ -33,7 +31,6 @@ extension Array where Element == QuotaTierContent {
         var priceRow: [String] = ["price"]
         for tier in orderedTiers {
             if let content = contentsByTier[tier] {
-                // Use your custom string(all:)
                 priceRow.append(content.price.string(all: showAllFields))
             } else {
                 priceRow.append("-")
