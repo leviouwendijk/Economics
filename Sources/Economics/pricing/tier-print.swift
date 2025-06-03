@@ -17,7 +17,7 @@ extension Array where Element == QuotaTierContent {
         orderedTiers: [QuotaTierType] = [.local, .combined, .remote],
         includeCost: Bool = true,
         includeBase: Bool = true,
-        padding: Int = 2,
+        padding: Int = 8,
         /// If `true`, each cell shows the full “prognosis/suggestion/base” text;
         /// if `false`, it shows only the `suggestion`.
         showAllFields: Bool = false
