@@ -17,7 +17,10 @@ extension Array where Element == QuotaTierContent {
         orderedTiers: [QuotaTierType] = [.local, .combined, .remote],
         includeCost: Bool = true,
         includeBase: Bool = true,
-        padding: Int = 2
+        padding: Int = 2,
+        /// If `true`, each cell shows the full “prognosis/suggestion/base” text;
+        /// if `false`, it shows only the `suggestion`.
+        showAllFields: Bool = false
     ) -> String {
         let contentsByTier: [QuotaTierType: QuotaTierContent] =
             Dictionary(uniqueKeysWithValues: self.map { ($0.tier, $0) })
@@ -30,9 +33,10 @@ extension Array where Element == QuotaTierContent {
         var priceRow: [String] = ["price"]
         for tier in orderedTiers {
             if let content = contentsByTier[tier] {
-                priceRow.append("\(content.price)")
+                // Use your custom string(all:)
+                priceRow.append(content.price.string(all: showAllFields))
             } else {
-                priceRow.append("-") // or ""
+                priceRow.append("-")
             }
         }
         rows.append(priceRow)
@@ -41,7 +45,7 @@ extension Array where Element == QuotaTierContent {
             var costRow: [String] = ["cost"]
             for tier in orderedTiers {
                 if let content = contentsByTier[tier] {
-                    costRow.append("\(content.cost)")
+                    costRow.append(content.cost.string(all: showAllFields))
                 } else {
                     costRow.append("-")
                 }
@@ -53,7 +57,7 @@ extension Array where Element == QuotaTierContent {
             var baseRow: [String] = ["base"]
             for tier in orderedTiers {
                 if let content = contentsByTier[tier] {
-                    baseRow.append("\(content.base)")
+                    baseRow.append(content.base.string(all: showAllFields))
                 } else {
                     baseRow.append("-")
                 }

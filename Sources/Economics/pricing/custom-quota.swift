@@ -204,6 +204,16 @@ public struct QuotaTierRate: Sendable {
         self.suggestion = suggestion
         self.base = base
     }
+
+    public func string(all: Bool = false) -> String {
+        // let prog = String(format: "%.2f", prognosis)
+        let sugg = String(format: "%.2f", suggestion)
+        // let base = String(format: "%.2f", base)
+
+        let strAll = String(format: "prognosis: %.2f, suggestion: %.2f, base: %.2f", prognosis, suggestion, base)
+
+        return all ? strAll : sugg
+    }
 }
 
 public func quota(
