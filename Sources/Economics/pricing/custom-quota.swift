@@ -116,6 +116,9 @@ public struct CustomQuota: Sendable {
         if let client = clientIdentifier {
             str.append(client)
             str.append("\n")
+            let div = String(repeating: "-", count: 55)
+            str.append(div)
+            str.append("\n")
         }
 
         let settings = """
