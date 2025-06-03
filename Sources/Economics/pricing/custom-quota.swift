@@ -109,6 +109,47 @@ public struct CustomQuota: Sendable {
         }
         return tiers
     }
+
+    public func inputs() -> String {
+        return """
+        kilometers: \(travelCost.kilometers)
+            at:
+                \(travelCost.rates.time) / hr
+                \(travelCost.rates.travel) / km
+            for: 
+                \(travelCost.traveledHours()) hours
+        using base rate: \(base)
+        """
+    }
+
+    public func tierSummary(for tier: QuotaTierType) -> String {
+        let content = self.tier(for: tier)
+
+        return """
+        \(content.string())
+
+        \(self.inputs())
+        """
+    }
+
+    public func quotaSummary() -> String {
+        let contents = self.tiers()
+
+        return """
+        \(self.inputs())
+
+        \(contents.table())
+        """
+    }
+
+    // public func tiersStringDictionary() -> [QuotaTierType: String] {
+    //     let contents = self.tiers()
+    //     var dict: [QuotaTierType: String] = [:]
+    //     for t in contents {
+    //         dict[t.tier] = t.string()
+    //     }
+    //     return dict
+    // }
 }
 
 public struct QuotaTierContent: Sendable {
@@ -127,6 +168,25 @@ public struct QuotaTierContent: Sendable {
         self.base = base
         self.cost = cost
         self.price = price
+    }
+
+    public func string(
+        tier: Bool = true,
+        cost: Bool = true,
+        base: Bool = true
+    ) -> String {
+        var str = ""
+        if tier {
+            str.append("tier: \(self.tier.rawValue)\n\n")
+        }
+        str.append("price: \(price)\n")
+        if cost {
+            str.append("cost: \(cost)\n")
+        }
+        if base {
+            str.append("base: \(base)\n")
+        }
+        return str
     }
 }
 
@@ -165,3 +225,4 @@ public func quota(
     
     return quota
 }
+
