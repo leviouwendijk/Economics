@@ -116,6 +116,7 @@ public struct CustomQuota: Sendable {
             at:
                 \(travelCost.rates.time) / hr
                 \(travelCost.rates.travel) / km
+                \(travelCost.speed) km/hr
             for: 
                 \(travelCost.traveledHours()) hours
         using base rate: \(base)
