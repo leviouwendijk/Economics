@@ -187,11 +187,14 @@ public struct CustomQuota: Sendable {
 
         estimation:
             prognosis: \(prognosis.count) sessions
-                of which remote: \(prognosis.remote)
-                of which local: \(prognosis.local)
+                remote: \(prognosis.remote)
+                local: \(prognosis.local)
             suggestion: \(suggestion.count) sessions
-                of which remote: \(suggestion.remote)
-                of which local: \(suggestion.local)
+                remote: \(suggestion.remote)
+                local: \(suggestion.local)
+            singular: \(suggestion.count) sessions
+                remote: \(singular.remote)
+                local: \(singular.local)
         """
 
         str.append(settings)
