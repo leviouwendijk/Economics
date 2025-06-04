@@ -23,6 +23,10 @@ public class QuotaViewModel: ObservableObject {
                 count: "3",
                 local: "2"
             ),
+            singular: SessionCountEstimationInputs(
+                count: "1",
+                local: "0"
+            ),
             travelCost: TravelCostInputs(
                 kilometers: "",
                 speed: "80.0",

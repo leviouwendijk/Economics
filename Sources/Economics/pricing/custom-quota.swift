@@ -21,18 +21,20 @@ public struct CustomQuota: Sendable {
         travelCost: TravelCost,
         prognosis: SessionCountEstimationObject,
         suggestion: SessionCountEstimationObject,
-        singular: SessionCountEstimationObject? = nil
+        singular: SessionCountEstimationObject
+        // singular: SessionCountEstimationObject? = nil
     ) throws {
         self.base = base
         self.travelCost = travelCost
         // self.estimation = estimation
         self.prognosis = prognosis
         self.suggestion = suggestion
-        if let s = singular {
-            self.singular = s
-        } else {
-            self.singular = try SessionCountEstimationObject(count: 1, local: 0)
-        }
+        // if let s = singular {
+        //     self.singular = s
+        // } else {
+        //     self.singular = try SessionCountEstimationObject(count: 1, local: 0)
+        // }
+        self.singular = singular
     }
 
     public func cost(in tier: QuotaTierType, for level: QuotaLevelType) -> Double {
@@ -47,14 +49,15 @@ public struct CustomQuota: Sendable {
             case .combined:
             switch level {
                 case .singular:
-                // multiplier = Double(self.singular.remote)
-                // do mean cost per 'remote' session instead -- if high, change to cost per session average ('count')
-                let prog = Double(prognosis.remote) * cost
-                let sugg = Double(suggestion.remote) * cost
-                let meanCost = (prog + sugg) / 2.0
-                let meanSessions = (Double(prognosis.remote) + Double(suggestion.remote)) / 2.0
-                let averageCost = meanCost / meanSessions
-                return averageCost
+                // // multiplier = Double(self.singular.remote)
+                // // do mean cost per 'remote' session instead -- if high, change to cost per session average ('count')
+                // let prog = Double(prognosis.remote) * cost
+                // let sugg = Double(suggestion.remote) * cost
+                // let meanCost = (prog + sugg) / 2.0
+                // let meanSessions = (Double(prognosis.remote) + Double(suggestion.remote)) / 2.0
+                // let averageCost = meanCost / meanSessions
+                // return averageCost
+                multiplier = Double(self.singular.remote)
 
                 case .suggestion:
                 multiplier = Double(self.suggestion.remote)

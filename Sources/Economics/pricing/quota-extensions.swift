@@ -37,6 +37,7 @@ extension QuotaTierContent {
     public func locationStringReplacements() -> [StringTemplateReplacement] {
         let prognosisLocationStrings = SessionLocationString(for: tier, estimationObject: self.levels.prognosis.estimation)
         let suggestionLocationStrings = SessionLocationString(for: tier, estimationObject: self.levels.suggestion.estimation)
+        let singularLocationStrings = SessionLocationString(for: tier, estimationObject: self.levels.singular.estimation)
 
         func suffix(_ count: Int) -> String {
             return count > 1 ? "sessies" : "sessie"
@@ -53,8 +54,12 @@ extension QuotaTierContent {
         let suggCount = levels.suggestion.estimation.count.string()
         let suggLocal = levels.suggestion.estimation.local.string()
 
+        let singCount = levels.singular.estimation.count.string()
+        let singLocal = levels.singular.estimation.local.string()
+
         let suffixedProgCount = "\(progCount) \(suffix(levels.prognosis.estimation.count))"
         let suffixedSuggCount = "\(suggCount) \(suffix(levels.suggestion.estimation.count))"
+        let suffixedSingCount = "\(singCount) \(suffix(levels.singular.estimation.count))"
 
         return [
             // prognosis
@@ -88,6 +93,23 @@ extension QuotaTierContent {
             StringTemplateReplacement(
                 placeholders: ["\(prefix)_suggestion_local"], 
                 replacement: suggLocal,
+                initializer: .auto
+            ),
+
+            // singular
+            StringTemplateReplacement(
+                placeholders: ["\(prefix)_singular_count"], 
+                replacement: singCount,
+                initializer: .auto
+            ),
+            StringTemplateReplacement(
+                placeholders: ["\(prefix)_singular_count_suffix"], 
+                replacement: suffixedSingCount,
+                initializer: .auto
+            ),
+            StringTemplateReplacement(
+                placeholders: ["\(prefix)_singular_local"], 
+                replacement: singLocal,
                 initializer: .auto
             ),
 
@@ -125,10 +147,26 @@ extension QuotaTierContent {
             ),
 
             StringTemplateReplacement(
-                placeholders: ["session_locations"], // rename this / place this when local / remote?
-                replacement: " ",
+                placeholders: ["\(prefix)_singular_remote_string"], 
+                replacement: singularLocationStrings.split(for: .remote),
                 initializer: .auto
             ),
+            StringTemplateReplacement(
+                placeholders: ["\(prefix)_singular_local_string"],
+                replacement: singularLocationStrings.split(for: .local),
+                initializer: .auto
+            ),
+            StringTemplateReplacement(
+                placeholders: ["\(prefix)_singular_full_string"],
+                replacement: singularLocationStrings.combined(),
+                initializer: .auto
+            ),
+
+            // StringTemplateReplacement(
+            //     placeholders: ["session_locations"], // rename this / place this when local / remote?
+            //     replacement: " ",
+            //     initializer: .auto
+            // ),
         ]
     }
 }

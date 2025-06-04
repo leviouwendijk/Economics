@@ -104,18 +104,21 @@ public struct CustomQuotaInputs: Sendable {
     public var base: String
     public var prognosis: SessionCountEstimationInputs
     public var suggestion: SessionCountEstimationInputs
+    public var singular: SessionCountEstimationInputs
     public var travelCost: TravelCostInputs
 
     public init(
         base: String,
         prognosis: SessionCountEstimationInputs,
         suggestion: SessionCountEstimationInputs,
+        singular: SessionCountEstimationInputs,
         travelCost: TravelCostInputs
     )
     {
         self.base = base
         self.prognosis = prognosis
         self.suggestion = suggestion
+        self.singular = singular
         self.travelCost = travelCost
     }
 
@@ -126,6 +129,7 @@ public struct CustomQuotaInputs: Sendable {
 
         let prog = try prognosis.sessionCountEstimation()
         let sugg = try suggestion.sessionCountEstimation()
+        let sing = try singular.sessionCountEstimation()
         let trav = try travelCost.travelCost()
         // let esti = try SessionCountEstimation(
         //     prognosis: prog,
@@ -137,7 +141,8 @@ public struct CustomQuotaInputs: Sendable {
             travelCost: trav,
             // estimation: esti
             prognosis: prog,
-            suggestion: sugg
+            suggestion: sugg,
+            singular: sing
         )
     }
 }
