@@ -68,17 +68,17 @@ public struct TravelCostInputs: Sendable {
 }
 
 public struct SessionCountEstimationInputs: Sendable {
-    public var type: SessionCountEstimationType
+    // public var type: SessionCountEstimationType
     public var count: String
     public var local: String
 
     public init(
-        type: SessionCountEstimationType,
+        // type: SessionCountEstimationType,
         count: String,
         local: String
     )
     {
-        self.type = type
+        // self.type = type
         self.count = count
         self.local = local
     }
@@ -93,7 +93,7 @@ public struct SessionCountEstimationInputs: Sendable {
         }
 
         return try SessionCountEstimationObject(
-            type: type,
+            // type: type,
             count: co,
             local: loc
         )
@@ -127,15 +127,17 @@ public struct CustomQuotaInputs: Sendable {
         let prog = try prognosis.sessionCountEstimation()
         let sugg = try suggestion.sessionCountEstimation()
         let trav = try travelCost.travelCost()
-        let esti = try SessionCountEstimation(
-            prognosis: prog,
-            suggestion: sugg
-        )
+        // let esti = try SessionCountEstimation(
+        //     prognosis: prog,
+        //     suggestion: sugg
+        // )
 
-        return CustomQuota(
+        return try CustomQuota(
             base: ba,
             travelCost: trav,
-            estimation: esti
+            // estimation: esti
+            prognosis: prog,
+            suggestion: sugg
         )
     }
 }

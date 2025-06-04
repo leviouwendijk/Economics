@@ -1,102 +1,130 @@
 import Foundation
 
 extension Array where Element == QuotaTierContent {
-    public func string(
-        cost: Bool = true,
-        base: Bool = true
-    ) -> String {
-        var str = ""
-        for t in self {
-            str.append(t.string())
-            str.append("\n")
-        }
-        return str.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    // public func string(
+    //     cost: Bool = true,
+    //     base: Bool = true
+    // ) -> String {
+    //     var str = ""
+    //     for t in self {
+    //         str.append(t.string())
+    //         str.append("\n")
+    //     }
+    //     return str.trimmingCharacters(in: .whitespacesAndNewlines)
+    // }
 
+    /// Print three little “horizontal” tables—one for each QuotaLevelType (.prognosis, .suggestion, .singular).
+    /// Each sub‐table has columns [local, combined, remote] and rows [price, cost, base].
+    ///
+    /// - Parameters:
+    ///   - orderedTiers: in what order to show the columns (default: [.local, .combined, .remote])
+    ///   - padding: how many spaces between columns (default: 8)
+    ///
+    /// - Returns: One big multiline String, e.g.:
+    ///
+    ///   prognosis:
+    ///                local          combined        remote
+    ///   -------------------------------------------------------
+    ///   price         1050.00        1065.62         1096.88
+    ///   cost          0.00           15.62           46.88
+    ///   base          1050.00        1050.00         1050.00
+    ///
+    ///   suggestion:
+    ///                local          combined        remote
+    ///   -------------------------------------------------------
+    ///   price         1050.00        1065.62         1096.88
+    ///   cost          0.00           15.62           46.88
+    ///   base          1050.00        1050.00         1050.00
+    ///
+    ///   singular:
+    ///                local          combined        remote
+    ///   -------------------------------------------------------
+    ///   price         1050.00        1065.62         1096.88
+    ///   cost          0.00           15.62           46.88
+    ///   base          1050.00        1050.00         1050.00
     public func table(
         orderedTiers: [QuotaTierType] = [.local, .combined, .remote],
-        includeCost: Bool = true,
-        includeBase: Bool = true,
-        padding: Int = 8,
-        showAllFields: Bool = false
+        padding: Int = 8
     ) -> String {
-        let contentsByTier: [QuotaTierType: QuotaTierContent] =
-            Dictionary(uniqueKeysWithValues: self.map { ($0.tier, $0) })
+        var allLines: [String] = []
 
-        var rows: [[String]] = []
+        for levelCase in QuotaLevelType.allCases {
+            allLines.append("\(levelCase.rawValue):")
 
-        let headerRow: [String] = [""] + orderedTiers.map { $0.rawValue }
-        rows.append(headerRow)
+            var rows: [[String]] = []
 
-        var priceRow: [String] = ["price"]
-        for tier in orderedTiers {
-            if let content = contentsByTier[tier] {
-                priceRow.append(content.price.string(all: showAllFields))
-            } else {
-                priceRow.append("-")
+            let headerRow: [String] = [""] + orderedTiers.map { $0.rawValue }
+            rows.append(headerRow)
+
+            var priceRow: [String] = ["price"]
+            for tier in orderedTiers {
+                if let content = self.first(where: { $0.tier == tier }),
+                   let lvl = content.levels.first(where: { $0.level == levelCase })
+                {
+                    priceRow.append(String(format: "%.2f", lvl.rate.price))
+                } else {
+                    priceRow.append("-")
+                }
             }
-        }
-        rows.append(priceRow)
+            rows.append(priceRow)
 
-        if includeCost {
             var costRow: [String] = ["cost"]
             for tier in orderedTiers {
-                if let content = contentsByTier[tier] {
-                    costRow.append(content.cost.string(all: showAllFields))
+                if let content = self.first(where: { $0.tier == tier }),
+                   let lvl = content.levels.first(where: { $0.level == levelCase })
+                {
+                    costRow.append(String(format: "%.2f", lvl.rate.cost))
                 } else {
                     costRow.append("-")
                 }
             }
             rows.append(costRow)
-        }
 
-        if includeBase {
             var baseRow: [String] = ["base"]
             for tier in orderedTiers {
-                if let content = contentsByTier[tier] {
-                    baseRow.append(content.base.string(all: showAllFields))
+                if let content = self.first(where: { $0.tier == tier }),
+                   let lvl = content.levels.first(where: { $0.level == levelCase })
+                {
+                    baseRow.append(String(format: "%.2f", lvl.rate.base))
                 } else {
                     baseRow.append("-")
                 }
             }
             rows.append(baseRow)
-        }
 
-        let columnCount = rows.first?.count ?? 0
-        var maxWidths: [Int] = [Int](repeating: 0, count: columnCount)
-
-        for row in rows {
-            for (i, cell) in row.enumerated() {
-                if cell.count > maxWidths[i] {
-                    maxWidths[i] = cell.count
+            let columnCount = rows.first?.count ?? 0
+            var maxWidths = [Int](repeating: 0, count: columnCount)
+            for row in rows {
+                for (i, cell) in row.enumerated() {
+                    maxWidths[i] = Swift.max(maxWidths[i], cell.count)
                 }
             }
-        }
 
-        var lines: [String] = []
-
-        let padBetween = String(repeating: " ", count: padding)
-        let headerCells = zip(rows[0], maxWidths).map { (cell, width) -> String in
-            let extra = width - cell.count
-            let left = extra / 2
-            let right = extra - left
-            return String(repeating: " ", count: left)
-                 + cell
-                 + String(repeating: " ", count: right)
-        }
-        lines.append(headerCells.joined(separator: padBetween))
-
-        for rowIndex in 1..<rows.count {
-            let row = rows[rowIndex]
-            var paddedCells: [String] = []
-            for (i, cell) in row.enumerated() {
-                let paddingNeeded = maxWidths[i] - cell.count
-                let leftAligned = cell + String(repeating: " ", count: paddingNeeded)
-                paddedCells.append(leftAligned)
+            let padBetween = String(repeating: " ", count: padding)
+            let headerCells = zip(rows[0], maxWidths).map { (cell, width) -> String in
+                let extra = width - cell.count
+                let left  = extra / 2
+                let right = extra - left
+                return String(repeating: " ", count: left)
+                     + cell
+                     + String(repeating: " ", count: right)
             }
-            lines.append(paddedCells.joined(separator: padBetween))
-        }
+            allLines.append(headerCells.joined(separator: padBetween))
 
-        return lines.joined(separator: "\n")
+            let separatorLine = String(repeating: "-", count: headerCells.joined(separator: padBetween).count)
+            allLines.append(separatorLine)
+
+            for rowIndex in 1..<rows.count {
+                let row = rows[rowIndex]
+                let padded = row.enumerated().map { (i, cell) in
+                    let extra = maxWidths[i] - cell.count
+                    return cell + String(repeating: " ", count: extra)
+                }
+                allLines.append(padded.joined(separator: padBetween))
+            }
+
+            allLines.append("")
+        }
+        return allLines.joined(separator: "\n")
     }
 }

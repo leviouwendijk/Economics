@@ -4,110 +4,148 @@ public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable {
     case local
     case combined
     case remote
-
-    public func travelable(in estimation: SessionCountEstimation, for type: SessionCountEstimationType) -> Int {
-        switch self {
-            case .local:
-            return 0
-            case .combined:
-            switch type {
-                case .prognosis:
-                return estimation.prognosis.count - estimation.prognosis.local
-                case .suggestion:
-                return estimation.suggestion.count - estimation.suggestion.local
-            }
-            case .remote:
-            switch type {
-                case .prognosis:
-                return estimation.prognosis.count
-                case .suggestion:
-                return estimation.suggestion.count
-            }
-        }
-    }
 }
 
 public struct CustomQuota: Sendable {
     public let base: Double
     public let travelCost: TravelCost
-    public let estimation: SessionCountEstimation 
+    // public let estimation: SessionCountEstimation 
+    // public let estimation: [SessionCountEstimationObject] 
+    public let prognosis: SessionCountEstimationObject
+    public let suggestion: SessionCountEstimationObject
+    public let singular: SessionCountEstimationObject
 
     public init(
         base: Double = 350,
         travelCost: TravelCost,
-        estimation: SessionCountEstimation
-    ) {
+        prognosis: SessionCountEstimationObject,
+        suggestion: SessionCountEstimationObject,
+        singular: SessionCountEstimationObject? = nil
+    ) throws {
         self.base = base
         self.travelCost = travelCost
-        self.estimation = estimation
+        // self.estimation = estimation
+        self.prognosis = prognosis
+        self.suggestion = suggestion
+        if let s = singular {
+            self.singular = s
+        } else {
+            self.singular = try SessionCountEstimationObject(count: 1, local: 0)
+        }
     }
 
-    public func cost(for tier: QuotaTierType) -> QuotaTierRate {
-        guard tier != .local else {
-            return QuotaTierRate(prognosis: 0, suggestion: 0, base: 0)
-        }
-
+    public func cost(in tier: QuotaTierType, for level: QuotaLevelType) -> Double {
         let cost = travelCost.total()
         
-        let prog = tier.travelable(in: estimation, for: .prognosis)
-        let sugg = tier.travelable(in: estimation, for: .suggestion)
+        var multiplier = 0.0
 
-        let prognosis = Double(prog) * cost
-        let suggestion = Double(sugg) * cost
+        switch tier {
+            case .local:
+            multiplier = 0.0
 
-        let meanSessions = (Double(estimation.prognosis.count) + Double(estimation.suggestion.count)) / 2.0
-        let meanCost = (prognosis + suggestion) / 2.0
-        let avgCost = meanCost / meanSessions
+            case .combined:
+            switch level {
+                case .singular:
+                // multiplier = Double(self.singular.remote)
+                // do mean cost per 'remote' session instead -- if high, change to cost per session average ('count')
+                let prog = Double(prognosis.remote) * cost
+                let sugg = Double(suggestion.remote) * cost
+                let meanCost = (prog + sugg) / 2.0
+                let meanSessions = (Double(prognosis.remote) + Double(suggestion.remote)) / 2.0
+                let averageCost = meanCost / meanSessions
+                return averageCost
 
-        return QuotaTierRate(
-            prognosis: prognosis,
-            suggestion: suggestion,
-            base: tier == .combined ? avgCost : cost
-        )
-    }
+                case .suggestion:
+                multiplier = Double(self.suggestion.remote)
 
-    public func base(for tier: QuotaTierType) -> QuotaTierRate {
-        let prognosis = estimation.prognosis.double * base 
-        let suggestion = estimation.suggestion.double * base 
+                case .prognosis:
+                multiplier = Double(self.prognosis.remote)
+            }
 
-        return QuotaTierRate(
-            prognosis: prognosis,
-            suggestion: suggestion,
-            base: base
-        )
-    }
+            case .remote:
+            switch level {
+                case .singular:
+                multiplier = Double(self.singular.count)
 
-    public func price(for tier: QuotaTierType) -> QuotaTierRate {
-        let cost = cost(for: tier) 
-        let baseRate = base(for: tier)
+                case .suggestion:
+                multiplier = Double(self.suggestion.count)
 
-        let prognosis = baseRate.prognosis + cost.prognosis
-        let suggestion = baseRate.suggestion + cost.suggestion
-
-        let basePrice = baseRate.base + cost.base
-
-        return QuotaTierRate(
-            prognosis: prognosis,
-            suggestion: suggestion,
-            base: basePrice
-        )
-    }
-
-    public func tier(for tier: QuotaTierType) -> QuotaTierContent {
-        return QuotaTierContent(
-            tier: tier,
-            base: base(for: tier),
-            cost: cost(for: tier),
-            price: price(for: tier)
-        )
-    }
-
-    public func tiers() -> [QuotaTierContent] {
-        var tiers: [QuotaTierContent] = []
-        for t in QuotaTierType.allCases {
-            tiers.append(tier(for: t))
+                case .prognosis:
+                multiplier = Double(self.prognosis.count)
+            }
         }
-        return tiers
+
+        return cost * multiplier
+    }
+
+    public func base(for level: QuotaLevelType) -> Double {
+        var multiplier = 0.0
+        switch level {
+            case .singular:
+            multiplier = Double(self.singular.count)
+
+            case .suggestion:
+            multiplier = Double(self.suggestion.count)
+
+            case .prognosis:
+            multiplier = Double(self.prognosis.count)
+        }
+        return base * multiplier
+    }
+
+    // public func price(in tier: QuotaTierType, for level: QuotaLevelType) -> Double {
+    //     let base = base(for: level)
+    //     let cost = cost(in: tier, for: level)
+
+    //     return base + cost
+    // }
+
+    public func estimation(for level: QuotaLevelType) -> SessionCountEstimationObject {
+        switch level {
+            case .singular:
+            return singular
+            case .suggestion:
+            return suggestion
+            case .prognosis:
+            return prognosis
+        }
+    }
+
+    public func level(in tier: QuotaTierType, for level: QuotaLevelType) throws -> QuotaTierLevel {
+        return try QuotaTierLevel(
+            level: level,
+            rate: QuotaRate(
+                base: base(for: level),
+                cost: cost(in: tier, for: level)
+            ),
+            estimation: estimation(for: level)
+        )
+    }
+
+    public func levels(in tier: QuotaTierType) throws -> [QuotaTierLevel] {
+        var all: [QuotaTierLevel] = []
+        for i in QuotaLevelType.allCases {
+            let level = try self.level(in: tier, for: i)
+            all.append(level)
+        }
+        return all
+    }
+
+    public func tier(being type: QuotaTierType) throws -> QuotaTierContent {
+        let levels = try self.levels(in: type)
+        return try QuotaTierContent(
+            tier: type,
+            levels: levels
+        )
+    }
+
+    public func tiers() throws -> [QuotaTierContent] {
+        var contents: [QuotaTierContent] = []
+        for i in QuotaTierType.allCases {
+            let tier = try self.tier(being: i)
+            contents.append(tier)
+        }
+        return contents
     }
 
     public func inputs(for clientIdentifier: String? = nil) -> String {
@@ -132,30 +170,30 @@ public struct CustomQuota: Sendable {
         using base rate: \(base)
 
         estimation:
-            prognosis: \(estimation.prognosis.count) sessions
-                of which remote: \(estimation.prognosis.remote)
-                of which local: \(estimation.prognosis.local)
-            suggestion: \(estimation.suggestion.count) sessions
-                of which remote: \(estimation.suggestion.remote)
-                of which local: \(estimation.suggestion.local)
+            prognosis: \(prognosis.count) sessions
+                of which remote: \(prognosis.remote)
+                of which local: \(prognosis.local)
+            suggestion: \(suggestion.count) sessions
+                of which remote: \(suggestion.remote)
+                of which local: \(suggestion.local)
         """
 
         str.append(settings)
         return str
     }
 
-    public func tierSummary(for tier: QuotaTierType, clientIdentifier: String? = nil) -> String {
-        let content = self.tier(for: tier)
+    // public func tierSummary(for tier: QuotaTierType, clientIdentifier: String? = nil) -> String {
+    //     let content = self.tier(being: tier)
 
-        return """
-        \(content.string())
+    //     return """
+    //     \(content.string())
 
-        \(self.inputs(for: clientIdentifier))
-        """
-    }
+    //     \(self.inputs(for: clientIdentifier))
+    //     """
+    // }
 
-    public func quotaSummary(clientIdentifier: String? = nil) -> String {
-        let contents = self.tiers()
+    public func quotaSummary(clientIdentifier: String? = nil) throws -> String {
+        let contents = try self.tiers()
 
         return """
         \(self.inputs(for: clientIdentifier))
@@ -163,98 +201,129 @@ public struct CustomQuota: Sendable {
         \(contents.table())
         """
     }
-
-    // public func tiersStringDictionary() -> [QuotaTierType: String] {
-    //     let contents = self.tiers()
-    //     var dict: [QuotaTierType: String] = [:]
-    //     for t in contents {
-    //         dict[t.tier] = t.string()
-    //     }
-    //     return dict
-    // }
 }
 
 public struct QuotaTierContent: Sendable {
     public let tier: QuotaTierType
-    public let base: QuotaTierRate
-    public let cost: QuotaTierRate
-    public let price: QuotaTierRate
+    // public let base: QuotaTierRate
+    // public let cost: QuotaTierRate
+    // public let price: QuotaTierRate
+    public let levels: [QuotaTierLevel]
+    public let restriction: SessionCountEstimationInitializerRestriction
 
     public init(
         tier: QuotaTierType,
-        base: QuotaTierRate,
-        cost: QuotaTierRate,
-        price: QuotaTierRate
-    ) {
+        // base: QuotaTierRate,
+        // cost: QuotaTierRate,
+        // price: QuotaTierRate
+        levels: [QuotaTierLevel],
+        restriction: SessionCountEstimationInitializerRestriction = .incremental
+    ) throws {
         self.tier = tier
-        self.base = base
-        self.cost = cost
-        self.price = price
+        // self.base = base
+        // self.cost = cost
+        // self.price = price
+        guard levels.containsAllCases() else {
+            let missing = levels.missingCases()
+            throw QuotaTierError.missingLevels(types: missing)
+        }
+        self.restriction = restriction
+        try levels.meetInitializerRestriction(type: restriction)
+        self.levels = levels
     }
 
-    public func string(
-        tier: Bool = true,
-        cost: Bool = true,
-        base: Bool = true
-    ) -> String {
-        var str = ""
-        if tier {
-            str.append("tier: \(self.tier.rawValue)\n\n")
-        }
-        str.append("price: \(price)\n")
-        if cost {
-            str.append("cost: \(cost)\n")
-        }
-        if base {
-            str.append("base: \(base)\n")
-        }
-        return str
-    }
+    // public func string(
+    //     tier: Bool = true,
+    //     cost: Bool = true,
+    //     base: Bool = true
+    // ) -> String {
+    //     var str = ""
+    //     if tier {
+    //         str.append("tier: \(self.tier.rawValue)\n\n")
+    //     }
+    //     str.append("price: \(price)\n")
+    //     if cost {
+    //         str.append("cost: \(cost)\n")
+    //     }
+    //     if base {
+    //         str.append("base: \(base)\n")
+    //     }
+    //     return str
+    // }
+
+    // public func flatten(to level: QuotaTierRateLevel) -> QuotaTierLevel {
+    //     switch level {
+    //     case .prognosis:
+    //         return QuotaTierLevel(
+    //             level: level,
+    //             price: self.price.prognosis,
+    //             cost:  self.cost.prognosis,
+    //             base:  self.base.prognosis
+    //         )
+
+    //     case .suggestion:
+    //         return QuotaTierLevel(
+    //             level: level,
+    //             price: self.price.suggestion,
+    //             cost:  self.cost.suggestion,
+    //             base:  self.base.suggestion
+    //         )
+
+    //     case .base:
+    //         return QuotaTierLevel(
+    //             level: level,
+    //             price: self.price.base,
+    //             cost:  self.cost.base,
+    //             base:  self.base.base
+    //         )
+    //     }
+    // }
 }
 
-public struct QuotaTierRate: Sendable {
-    public let prognosis: Double
-    public let suggestion: Double
-    public let base: Double
 
-    public init(
-        prognosis: Double,
-        suggestion: Double,
-        base: Double,
-    ) {
-        self.prognosis = prognosis
-        self.suggestion = suggestion
-        self.base = base
-    }
+// public struct QuotaTierRate: Sendable {
+//     public let prognosis: Double
+//     public let suggestion: Double
+//     public let base: Double
 
-    public func string(all: Bool = false) -> String {
-        // let prog = String(format: "%.2f", prognosis)
-        let sugg = String(format: "%.2f", suggestion)
-        // let base = String(format: "%.2f", base)
+//     public init(
+//         prognosis: Double,
+//         suggestion: Double,
+//         base: Double,
+//     ) {
+//         self.prognosis = prognosis
+//         self.suggestion = suggestion
+//         self.base = base
+//     }
 
-        let strAll = String(format: "prognosis: %.2f, suggestion: %.2f, base: %.2f", prognosis, suggestion, base)
+//     public func string(all: Bool = false) -> String {
+//         // let prog = String(format: "%.2f", prognosis)
+//         let sugg = String(format: "%.2f", suggestion)
+//         // let base = String(format: "%.2f", base)
 
-        return all ? strAll : sugg
-    }
-}
+//         let strAll = String(format: "prognosis: %.2f, suggestion: %.2f, base: %.2f", prognosis, suggestion, base)
 
-public func quota(
-    kilometers: Double,
-    prognosis: (Int, Int),
-    suggestion: (Int, Int),
-    base: Double
-) throws -> CustomQuota {
-    let travelCost = TravelCost(kilometers: kilometers)
-    let prog = try SessionCountEstimationObject(type: .prognosis, count: prognosis.0, local: prognosis.1)
-    let sugg = try SessionCountEstimationObject(type: .suggestion, count: suggestion.0, local: suggestion.1)
-    let estimation = try SessionCountEstimation(prognosis: prog, suggestion: sugg)
+//         return all ? strAll : sugg
+//     }
+// }
 
-    let quota = CustomQuota(
-        base: 350,
-        travelCost: travelCost,
-        estimation: estimation
-    )
+// public func quota(
+//     kilometers: Double,
+//     prognosis: (Int, Int),
+//     suggestion: (Int, Int),
+//     base: Double
+// ) throws -> CustomQuota {
+//     let travelCost = TravelCost(kilometers: kilometers)
+//     let prog = try SessionCountEstimationObject(type: .prognosis, count: prognosis.0, local: prognosis.1)
+//     let sugg = try SessionCountEstimationObject(type: .suggestion, count: suggestion.0, local: suggestion.1)
+//     let estimation = try SessionCountEstimation(prognosis: prog, suggestion: sugg)
+
+//     let quota = CustomQuota(
+//         base: 350,
+//         travelCost: travelCost,
+//         estimation: estimation
+//     )
     
-    return quota
-}
+//     return quota
+// }
 
