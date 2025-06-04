@@ -112,11 +112,15 @@ public struct CustomQuota: Sendable {
     }
 
     public func level(in tier: QuotaTierType, for level: QuotaLevelType) -> QuotaTierLevelContent {
+        let b = base(for: level)
+        let c = cost(in: tier, for: level)
+        let p = b + c
         return QuotaTierLevelContent(
             // level: level,
             rate: QuotaRate(
-                base: base(for: level),
-                cost: cost(in: tier, for: level)
+                base: b,
+                cost: c,
+                price: p
             ),
             estimation: estimation(for: level)
         )

@@ -1,25 +1,34 @@
 import Foundation
+import plate
 
-// NEW STRUCTS
-// for simplifying a rate calculation to isolated object
 public struct QuotaRate: Sendable {
-    // public let price: Double
     public let base: Double
     public let cost: Double
-    public var price: Double {
-        return base + cost
-    }
+    public let price: Double
+
+    // public var price: Double {
+    //     return base + cost
+    // }
 
     public init(
         base: Double,
-        cost: Double 
+        cost: Double,
+        price: Double
     ) {
         self.cost = cost
         self.base = base
+        self.price = price
+    }
+
+    public func rounded(to multiple: Double = 10, direction: RoundingOffsetDirection = .down, by offset: Double) -> QuotaRate {
+        return QuotaRate(
+            base: base.roundTo(multiple).offset(direction: direction, by: offset),
+            cost: cost.roundTo(multiple).offset(direction: direction, by: offset),
+            price: price.roundTo(multiple).offset(direction: direction, by: offset),
+        )
     }
 }
 
-// for selecting by level
 public enum QuotaLevelType: String, CaseIterable, Sendable {
     case prognosis
     case suggestion
