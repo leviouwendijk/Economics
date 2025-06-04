@@ -135,7 +135,7 @@ extension QuotaTierContent {
 }
 
 extension CustomQuota {
-    public func replacements(for tier: QuotaTierType) -> [StringTemplateReplacement] {
+    public func kilometerCodeReplacement(for tier: QuotaTierType) -> [StringTemplateReplacement] {
         let kilometerCode = KilometerCodes.encrypt(for: travelCost.kilometers)
 
         return [
