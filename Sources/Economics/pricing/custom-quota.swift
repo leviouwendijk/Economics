@@ -198,7 +198,7 @@ public struct CustomQuota: Sendable {
         return """
         \(self.inputs(for: clientIdentifier))
 
-        \(contents.table())
+        \(contents.table(by: .rate))
         """
     }
 }
