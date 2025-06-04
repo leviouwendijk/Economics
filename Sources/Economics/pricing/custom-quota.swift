@@ -1,4 +1,5 @@
 import Foundation
+import plate
 
 public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable {
     case local

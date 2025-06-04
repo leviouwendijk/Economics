@@ -20,7 +20,7 @@ public struct QuotaRate: Sendable {
         self.price = price
     }
 
-    public func rounded(to multiple: Double = 10, direction: RoundingOffsetDirection = .down, by offset: Double) -> QuotaRate {
+    public func rounded(to multiple: Double = 10, direction: RoundingOffsetDirection = .down, by offset: Double = 0.0) -> QuotaRate {
         return QuotaRate(
             base: base.roundTo(multiple).offset(direction: direction, by: offset),
             cost: cost.roundTo(multiple).offset(direction: direction, by: offset),

@@ -59,7 +59,6 @@ public struct SessionLocationString {
         self.strings = strings
     }
 
-
     public func split(for location: SessionLocation) -> String {
         let includeNumber = total > 1 ? true : false
 
