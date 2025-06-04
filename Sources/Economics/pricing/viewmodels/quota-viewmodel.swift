@@ -50,7 +50,6 @@ public class QuotaViewModel: ObservableObject {
                   do {
                       let q = try inputs.customQuotaEstimation()
                       DispatchQueue.main.async {
-                          // ← now back on main to update the UI
                           self.loadedQuota = q
                           self.isLoading = false
                       }

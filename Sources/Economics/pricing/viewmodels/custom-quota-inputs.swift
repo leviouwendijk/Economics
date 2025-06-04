@@ -68,17 +68,23 @@ public struct TravelCostInputs: Sendable {
 }
 
 public struct SessionCountEstimationInputs: Sendable {
-    // public var type: SessionCountEstimationType
-    public var count: String
+    public var count: String {
+        didSet {
+            if let newCount = Int(count),
+               let oldLocal  = Int(local),
+               newCount < oldLocal
+            {
+                local = "\(newCount)"
+            }
+        }
+    }
     public var local: String
 
     public init(
-        // type: SessionCountEstimationType,
         count: String,
         local: String
     )
     {
-        // self.type = type
         self.count = count
         self.local = local
     }
@@ -93,7 +99,6 @@ public struct SessionCountEstimationInputs: Sendable {
         }
 
         return try SessionCountEstimationObject(
-            // type: type,
             count: co,
             local: loc
         )
