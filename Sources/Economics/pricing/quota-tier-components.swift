@@ -1,6 +1,12 @@
 import Foundation
 import plate
 
+public enum QuotaRateType: String, CaseIterable, Sendable {
+    case base
+    case cost
+    case price
+}
+
 public struct QuotaRate: Sendable {
     public let base: Double
     public let cost: Double
@@ -76,6 +82,31 @@ public struct QuotaTierLevels: Sendable {
             }
         }
         return 
+    }
+
+    public func viewableTuples(of rate: QuotaRateType) -> [(String, Double)] {
+        switch rate {
+            case .price:
+            return [
+                ("prognosis", prognosis.rate.price),
+                ("suggestion", suggestion.rate.price),
+                ("singular", singular.rate.price)
+            ]
+
+            case .cost:
+            return [
+                ("prognosis", prognosis.rate.cost),
+                ("suggestion", suggestion.rate.cost),
+                ("singular", singular.rate.cost)
+            ]
+
+            case .base:
+            return [
+                ("prognosis", prognosis.rate.base),
+                ("suggestion", suggestion.rate.base),
+                ("singular", singular.rate.base)
+            ]
+        }
     }
 }
 

@@ -15,7 +15,6 @@ extension QuotaTierContent {
         .rounded(to: multiple, direction: .down, by: 1.0).price
         .integer()
 
-
         return [
             StringTemplateReplacement(
                 placeholders: ["prognosis_price"], 
