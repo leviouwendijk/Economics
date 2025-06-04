@@ -181,6 +181,8 @@ public struct CustomQuota: Sendable {
                 \(travelCost.speed) km/hr
             for: 
                 \(travelCost.traveledHours()) hours
+        cost per session: \(travelCost.total())
+
         using base rate: \(base)
 
         estimation:
