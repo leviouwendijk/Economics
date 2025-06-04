@@ -111,9 +111,9 @@ public struct CustomQuota: Sendable {
         }
     }
 
-    public func level(in tier: QuotaTierType, for level: QuotaLevelType) throws -> QuotaTierLevel {
-        return try QuotaTierLevel(
-            level: level,
+    public func level(in tier: QuotaTierType, for level: QuotaLevelType) -> QuotaTierLevelContent {
+        return QuotaTierLevelContent(
+            // level: level,
             rate: QuotaRate(
                 base: base(for: level),
                 cost: cost(in: tier, for: level)
@@ -122,18 +122,27 @@ public struct CustomQuota: Sendable {
         )
     }
 
-    public func levels(in tier: QuotaTierType) throws -> [QuotaTierLevel] {
-        var all: [QuotaTierLevel] = []
-        for i in QuotaLevelType.allCases {
-            let level = try self.level(in: tier, for: i)
-            all.append(level)
-        }
-        return all
+    public func levels(in tier: QuotaTierType) throws -> QuotaTierLevels {
+        let prognosis = self.level(in: tier, for: .prognosis)
+        let suggestion = self.level(in: tier, for: .suggestion)
+        let singular = self.level(in: tier, for: .singular)
+
+        return try QuotaTierLevels(
+            prognosis: prognosis,
+            suggestion: suggestion,
+            singular: singular
+        )
+        // var all: [QuotaTierLevelContent] = []
+        // for i in QuotaLevelType.allCases {
+        //     let level = try self.level(in: tier, for: i)
+        //     all.append(level)
+        // }
+        // return all
     }
 
     public func tier(being type: QuotaTierType) throws -> QuotaTierContent {
         let levels = try self.levels(in: type)
-        return try QuotaTierContent(
+        return QuotaTierContent(
             tier: type,
             levels: levels
         )
@@ -208,27 +217,24 @@ public struct QuotaTierContent: Sendable {
     // public let base: QuotaTierRate
     // public let cost: QuotaTierRate
     // public let price: QuotaTierRate
-    public let levels: [QuotaTierLevel]
-    public let restriction: SessionCountEstimationInitializerRestriction
+    public let levels: QuotaTierLevels
 
     public init(
         tier: QuotaTierType,
         // base: QuotaTierRate,
         // cost: QuotaTierRate,
         // price: QuotaTierRate
-        levels: [QuotaTierLevel],
-        restriction: SessionCountEstimationInitializerRestriction = .incremental
-    ) throws {
+        levels: QuotaTierLevels,
+    ) {
         self.tier = tier
         // self.base = base
         // self.cost = cost
         // self.price = price
-        guard levels.containsAllCases() else {
-            let missing = levels.missingCases()
-            throw QuotaTierError.missingLevels(types: missing)
-        }
-        self.restriction = restriction
-        try levels.meetInitializerRestriction(type: restriction)
+        // guard levels.containsAllCases() else {
+        //     let missing = levels.missingCases()
+        //     throw QuotaTierError.missingLevels(types: missing)
+        // }
+        // try levels.meetInitializerRestriction(type: restriction)
         self.levels = levels
     }
 
