@@ -4,12 +4,13 @@ import Combine
 @MainActor
 public class QuotaViewModel: ObservableObject {
     @Published public var customQuotaInputs: CustomQuotaInputs
-    
+ 
     @Published public private(set) var loadedQuota: CustomQuota? = nil
     @Published public private(set) var isLoading: Bool = false
 
     @Published public var errorMessage = ""
-    
+    // @Published public var errorMessage: String? = nil
+
     private var cancellables = Set<AnyCancellable>()
 
     // private var debounceQuotaTask: Task<Void, Never>? = nil
@@ -91,4 +92,42 @@ public class QuotaViewModel: ObservableObject {
     //         }
     //     }
     // }
+
+    public var hasEmptyInputs: Bool {
+        let inputs = customQuotaInputs
+
+        if inputs.base.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return true
+        }
+
+        if inputs.prognosis.count.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+           inputs.prognosis.local.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
+            return true
+        }
+        if inputs.suggestion.count.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+           inputs.suggestion.local.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
+            return true
+        }
+        if inputs.singular.count.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+           inputs.singular.local.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
+            return true
+        }
+
+        let travel = inputs.travelCost
+        if travel.kilometers.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+           travel.speed.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
+            return true
+        }
+        if travel.rates.travel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+           travel.rates.time.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
+            return true
+        }
+
+        return false
+    }
 }
