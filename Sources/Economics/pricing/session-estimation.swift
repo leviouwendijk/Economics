@@ -49,7 +49,7 @@ public struct SessionCountEstimationObject: Sendable {
 
     public func adjust(to tier: QuotaTierType) throws -> SessionCountEstimationObject {
         guard !(tier == .combined) else {
-            return self
+            return try SessionCountEstimationObject(count: count, local: local, adjusted: true)
         }
         let c = self.count
         return try SessionCountEstimationObject(count: c, tier: tier)
