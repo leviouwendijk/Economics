@@ -248,7 +248,7 @@ public struct QuotaTierContent: Sendable {
         if let client = clientIdentifier {
             str.append(client)
             str.append("\n")
-            let div = String(repeating: "-", count: 55)
+            let div = String(repeating: "-", count: 35)
             str.append(div)
             str.append("\n")
         }
