@@ -47,11 +47,11 @@ public struct CustomQuota: Sendable {
         case .combined:
             switch level {
                 case .singular:
-                return singular
+                return try singular.adjust(to: .combined)
                 case .suggestion:
-                return suggestion
+                return try suggestion.adjust(to: .combined)
                 case .prognosis:
-                return prognosis
+                return try prognosis.adjust(to: .combined)
             }
 
         case .local:

@@ -48,6 +48,9 @@ public struct SessionCountEstimationObject: Sendable {
     }
 
     public func adjust(to tier: QuotaTierType) throws -> SessionCountEstimationObject {
+        guard !(tier == .combined) else {
+            return self
+        }
         let c = self.count
         return try SessionCountEstimationObject(count: c, tier: tier)
     }
@@ -74,7 +77,6 @@ public struct SessionCountEstimationObject: Sendable {
         let multiplier = try self.multiplier(for: .base)
         return multiplier * baseRate
     }
-
 }
 
 // public struct SessionCountEstimation: Sendable {
