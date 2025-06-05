@@ -1,10 +1,14 @@
 import Foundation
 import plate
 
-public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable {
+public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable, Identifiable {
     case local
     case combined
     case remote
+
+    public var id: String {
+        rawValue
+    }
 }
 
 public struct CustomQuota: Sendable {
