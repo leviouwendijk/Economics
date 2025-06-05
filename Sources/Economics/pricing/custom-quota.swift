@@ -32,80 +32,53 @@ public struct CustomQuota: Sendable {
         self.singular = singular
     }
 
-    public func cost(in tier: QuotaTierType, for level: QuotaLevelType) -> Double {
-        let cost = travelCost.total()
-        
-        var multiplier = 0.0
+    public func cost(in tier: QuotaTierType, for level: QuotaLevelType) throws -> Double {
+        let adjusted = try self.adjusted(to: tier, for: level)
+        return try travelCost.cost(for: adjusted)
+    }
 
+    public func base(in tier: QuotaTierType, for level: QuotaLevelType) throws -> Double {
+        let adjusted = try self.adjusted(to: tier, for: level)
+        return try adjusted.base(using: base)
+    }
+
+    public func adjusted(to tier: QuotaTierType, for level: QuotaLevelType) throws -> SessionCountEstimationObject {
         switch tier {
-            case .local:
-            multiplier = 0.0
-
-            case .combined:
+        case .combined:
             switch level {
                 case .singular:
-                // // multiplier = Double(self.singular.remote)
-                // // do mean cost per 'remote' session instead -- if high, change to cost per session average ('count')
-                // let prog = Double(prognosis.remote) * cost
-                // let sugg = Double(suggestion.remote) * cost
-                // let meanCost = (prog + sugg) / 2.0
-                // let meanSessions = (Double(prognosis.remote) + Double(suggestion.remote)) / 2.0
-                // let averageCost = meanCost / meanSessions
-                // return averageCost
-                multiplier = Double(self.singular.remote)
-
+                return singular
                 case .suggestion:
-                multiplier = Double(self.suggestion.remote)
-
+                return suggestion
                 case .prognosis:
-                multiplier = Double(self.prognosis.remote)
+                return prognosis
             }
 
-            case .remote:
+        case .local:
             switch level {
                 case .singular:
-                multiplier = Double(self.singular.count)
-
+                return try singular.adjust(to: .local)
                 case .suggestion:
-                multiplier = Double(self.suggestion.count)
-
+                return try suggestion.adjust(to: .local)
                 case .prognosis:
-                multiplier = Double(self.prognosis.count)
+                return try prognosis.adjust(to: .local)
+            }
+
+        case .remote:
+            switch level {
+                case .singular:
+                return try singular.adjust(to: .remote)
+                case .suggestion:
+                return try suggestion.adjust(to: .remote)
+                case .prognosis:
+                return try prognosis.adjust(to: .remote)
             }
         }
-
-        return cost * multiplier
     }
 
-    public func base(for level: QuotaLevelType) -> Double {
-        var multiplier = 0.0
-        switch level {
-            case .singular:
-            multiplier = Double(self.singular.count)
-
-            case .suggestion:
-            multiplier = Double(self.suggestion.count)
-
-            case .prognosis:
-            multiplier = Double(self.prognosis.count)
-        }
-        return base * multiplier
-    }
-
-    public func estimation(for level: QuotaLevelType) -> SessionCountEstimationObject {
-        switch level {
-            case .singular:
-            return singular
-            case .suggestion:
-            return suggestion
-            case .prognosis:
-            return prognosis
-        }
-    }
-
-    public func level(in tier: QuotaTierType, for level: QuotaLevelType) -> QuotaTierLevelContent {
-        let b = base(for: level)
-        let c = cost(in: tier, for: level)
+    public func level(in tier: QuotaTierType, for level: QuotaLevelType) throws -> QuotaTierLevelContent {
+        let b = try base(in: tier, for: level)
+        let c = try cost(in: tier, for: level)
         let p = b + c
         return QuotaTierLevelContent(
             // level: level,
@@ -114,14 +87,14 @@ public struct CustomQuota: Sendable {
                 cost: c,
                 price: p
             ),
-            estimation: estimation(for: level)
+            estimation: try adjusted(to: tier, for: level)
         )
     }
 
     public func levels(in tier: QuotaTierType) throws -> QuotaTierLevels {
-        let prognosis = self.level(in: tier, for: .prognosis)
-        let suggestion = self.level(in: tier, for: .suggestion)
-        let singular = self.level(in: tier, for: .singular)
+        let prognosis = try self.level(in: tier, for: .prognosis)
+        let suggestion = try self.level(in: tier, for: .suggestion)
+        let singular = try self.level(in: tier, for: .singular)
 
         return try QuotaTierLevels(
             prognosis: prognosis,
@@ -202,7 +175,7 @@ public struct CustomQuota: Sendable {
         let settings = """
         (base: \(base), kilometers: \(travelCost.kilometers))
 
-        \(t.string())
+        \(t.string(for: tier, clientIdentifier: clientIdentifier))
         """
 
         str.append(settings)
@@ -242,7 +215,35 @@ public struct QuotaTierContent: Sendable {
         self.levels = levels
     }
 
-    public func string(for clientIdentifier: String? = nil) -> String {
+    // public func resolve(for tier: QuotaTierType) -> SessionCountEstimationObject {
+    //     var progRemote = 0
+    //     var progLocal = 0
+    //     var suggRemote = 0
+    //     var suggLocal = 0
+    //     var singular = ""
+
+    //     switch tier {
+    //         case .combined:
+    //         progRemote = levels.prognosis.estimation.remote
+    //         progLocal = levels.prognosis.estimation.local
+    //         suggRemote = levels.suggestion.estimation.remote
+    //         suggLocal = levels.suggestion.estimation.local
+    //         singular = levels.singular.estimation.local == 1 ? "l" : "r"
+
+    //         case .remote:
+    //         progRemote = levels.prognosis.estimation.count
+    //         progLocal = levels.prognosis.estimation.
+    //         suggRemote = levels.suggestion.estimation.remote
+    //         suggLocal = levels.suggestion.estimation.local
+    //         singular = levels.singular.estimation.local == 1 ? "l" : "r"
+
+
+    //     }
+        
+
+    // }
+
+    public func string(for tier: QuotaTierType, clientIdentifier: String? = nil) -> String {
         var str = ""
 
         if let client = clientIdentifier {
@@ -252,7 +253,7 @@ public struct QuotaTierContent: Sendable {
             str.append(div)
             str.append("\n")
         }
-        
+
         let singularLocation = levels.singular.estimation.local == 1 ? "l" : "r"
 
         let settings = """

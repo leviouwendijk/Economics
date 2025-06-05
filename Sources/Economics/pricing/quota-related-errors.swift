@@ -23,6 +23,9 @@ public enum SessionCountEstimationError: Error, LocalizedError, Sendable {
     case singularExceedsOne(count: Int)
     case suggestionExceedsPrognosis(prognosis: Int, suggestion: Int)
     case prognosisNotHigherThanSuggestion(prognosis: Int, suggestion: Int)
+    case cannotUsePreInitializerForCombinedTier
+    case isNotAdjustedForTier
+    case cannotGetMultiplierForPriceCase
 
     public var errorDescription: String? {
         switch self {
@@ -34,6 +37,12 @@ public enum SessionCountEstimationError: Error, LocalizedError, Sendable {
             return "Invalid SessionCountEstimationObject: prognosis (\(prognosis)) cannot exceed suggestion (\(suggestion))."
         case let .prognosisNotHigherThanSuggestion(prognosis, suggestion):
             return "Invalid SessionCountEstimationObject: prognosis (\(prognosis)) must exceed suggestion (\(suggestion))."
+        case .cannotUsePreInitializerForCombinedTier:
+            return "Invalid SessionCountEstimationObject init: .combined tier cannot pre-populate local or remote sessions, only .local and .remote."
+        case .isNotAdjustedForTier:
+            return "Invalid SessionCountEstimationObject operation: this is a raw session estimation object that has not been adjusted for local, remote, or combined"
+        case .cannotGetMultiplierForPriceCase:
+            return "Invalid SessionCountEstimationObject operation: price rateType does not have its own multiplier, because that is a sum of base and cost cases."
         }
     }
 }

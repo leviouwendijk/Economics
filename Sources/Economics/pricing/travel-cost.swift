@@ -59,6 +59,11 @@ public struct TravelCost: Sendable {
         }
         return sum
     }
+
+    public func cost(for adjustedEstimation: SessionCountEstimationObject) throws -> Double {
+        let multiplier = try adjustedEstimation.multiplier(for: .cost)
+        return multiplier * self.total()
+    }
 }
 
 public func timeCost(hours: Double, rate: Double) -> Double {
