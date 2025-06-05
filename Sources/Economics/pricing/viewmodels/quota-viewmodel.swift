@@ -20,12 +20,10 @@ public class QuotaViewModel: ObservableObject {
         self.customQuotaInputs = CustomQuotaInputs(
             base: "350",
             prognosis: SessionCountEstimationInputs(
-                // type: .prognosis,
                 count: "5",
                 local: "4"
             ),
             suggestion: SessionCountEstimationInputs(
-                // type: .suggestion,
                 count: "3",
                 local: "2"
             ),
@@ -45,31 +43,32 @@ public class QuotaViewModel: ObservableObject {
         )
     
         $customQuotaInputs
-          .debounce(for: .milliseconds(800), scheduler: DispatchQueue.main)
-          .sink { [weak self] inputs in
-              guard let self = self else { return }
+            .debounce(for: .milliseconds(800), scheduler: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] inputs in
+                guard let self = self else { return }
 
-              self.isLoading = true
-              self.loadedQuota = nil
+                self.isLoading = true
+                self.loadedQuota = nil
 
-              DispatchQueue.global(qos: .userInitiated).async {
-                  do {
-                      let q = try inputs.customQuotaEstimation()
-                      DispatchQueue.main.async {
-                          self.loadedQuota = q
-                          self.isLoading = false
-                          self.errorMessage = ""
-                      }
-                  } catch {
-                      DispatchQueue.main.async {
-                          self.loadedQuota = nil
-                          self.isLoading = false
-                          self.errorMessage = error.localizedDescription
-                      }
-                  }
-              }
-          }
-          .store(in: &cancellables)
+                DispatchQueue.global(qos: .userInitiated).async {
+                    do {
+                        let q = try inputs.customQuotaEstimation()
+                        DispatchQueue.main.async {
+                            self.loadedQuota = q
+                            self.isLoading = false
+                            self.errorMessage = ""
+                        }
+                    } catch {
+                        DispatchQueue.main.async {
+                            self.loadedQuota = nil
+                            self.isLoading = false
+                            self.errorMessage = error.localizedDescription
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
 
     // public func compute() {
