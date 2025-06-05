@@ -10,8 +10,6 @@ public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable {
 public struct CustomQuota: Sendable {
     public let base: Double
     public let travelCost: TravelCost
-    // public let estimation: SessionCountEstimation 
-    // public let estimation: [SessionCountEstimationObject] 
     public let prognosis: SessionCountEstimationObject
     public let suggestion: SessionCountEstimationObject
     public let singular: SessionCountEstimationObject
@@ -22,18 +20,11 @@ public struct CustomQuota: Sendable {
         prognosis: SessionCountEstimationObject,
         suggestion: SessionCountEstimationObject,
         singular: SessionCountEstimationObject
-        // singular: SessionCountEstimationObject? = nil
     ) throws {
         self.base = base
         self.travelCost = travelCost
-        // self.estimation = estimation
         self.prognosis = prognosis
         self.suggestion = suggestion
-        // if let s = singular {
-        //     self.singular = s
-        // } else {
-        //     self.singular = try SessionCountEstimationObject(count: 1, local: 0)
-        // }
         self.singular = singular
     }
 
@@ -97,13 +88,6 @@ public struct CustomQuota: Sendable {
         return base * multiplier
     }
 
-    // public func price(in tier: QuotaTierType, for level: QuotaLevelType) -> Double {
-    //     let base = base(for: level)
-    //     let cost = cost(in: tier, for: level)
-
-    //     return base + cost
-    // }
-
     public func estimation(for level: QuotaLevelType) -> SessionCountEstimationObject {
         switch level {
             case .singular:
@@ -140,12 +124,6 @@ public struct CustomQuota: Sendable {
             suggestion: suggestion,
             singular: singular
         )
-        // var all: [QuotaTierLevelContent] = []
-        // for i in QuotaLevelType.allCases {
-        //     let level = try self.level(in: tier, for: i)
-        //     all.append(level)
-        // }
-        // return all
     }
 
     public func tier(being type: QuotaTierType) throws -> QuotaTierContent {
@@ -204,6 +182,29 @@ public struct CustomQuota: Sendable {
         return str
     }
 
+    public func shortInputs(for tier: QuotaTierType, clientIdentifier: String? = nil) throws -> String {
+        var str = ""
+
+        if let client = clientIdentifier {
+            str.append(client)
+            str.append("\n")
+            let div = String(repeating: "-", count: 55)
+            str.append(div)
+            str.append("\n")
+        }
+
+        let t = try self.tier(being: tier)
+
+        let settings = """
+        (base: \(base), kilometers: \(travelCost.kilometers))
+
+        \(t.string())
+        """
+
+        str.append(settings)
+        return str
+    }
+
     // public func tierSummary(for tier: QuotaTierType, clientIdentifier: String? = nil) -> String {
     //     let content = self.tier(being: tier)
 
@@ -227,28 +228,37 @@ public struct CustomQuota: Sendable {
 
 public struct QuotaTierContent: Sendable {
     public let tier: QuotaTierType
-    // public let base: QuotaTierRate
-    // public let cost: QuotaTierRate
-    // public let price: QuotaTierRate
     public let levels: QuotaTierLevels
 
     public init(
         tier: QuotaTierType,
-        // base: QuotaTierRate,
-        // cost: QuotaTierRate,
-        // price: QuotaTierRate
         levels: QuotaTierLevels,
     ) {
         self.tier = tier
-        // self.base = base
-        // self.cost = cost
-        // self.price = price
-        // guard levels.containsAllCases() else {
-        //     let missing = levels.missingCases()
-        //     throw QuotaTierError.missingLevels(types: missing)
-        // }
-        // try levels.meetInitializerRestriction(type: restriction)
         self.levels = levels
+    }
+
+    public func string(for clientIdentifier: String? = nil) -> String {
+        var str = ""
+
+        if let client = clientIdentifier {
+            str.append(client)
+            str.append("\n")
+            let div = String(repeating: "-", count: 55)
+            str.append(div)
+            str.append("\n")
+        }
+        
+        let singularLocation = levels.singular.estimation.local == 1 ? "l" : "r"
+
+        let settings = """
+        prognosis: \(levels.prognosis.estimation.count) (r: \(levels.prognosis.estimation.remote), l: \(levels.prognosis.estimation.local))
+        suggestion: \(levels.suggestion.estimation.count) (r: \(levels.suggestion.estimation.remote), l: \(levels.suggestion.estimation.local))
+        singular: (r/l: \(singularLocation))
+        """
+
+        str.append(settings)
+        return str
     }
 
     // public func string(
