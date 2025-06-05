@@ -57,6 +57,7 @@ public class QuotaViewModel: ObservableObject {
                       DispatchQueue.main.async {
                           self.loadedQuota = q
                           self.isLoading = false
+                          self.errorMessage = ""
                       }
                   } catch {
                       DispatchQueue.main.async {
