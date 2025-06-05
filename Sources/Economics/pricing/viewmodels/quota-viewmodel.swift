@@ -7,6 +7,8 @@ public class QuotaViewModel: ObservableObject {
     
     @Published public private(set) var loadedQuota: CustomQuota? = nil
     @Published public private(set) var isLoading: Bool = false
+
+    @Published public var errorMessage = ""
     
     private var cancellables = Set<AnyCancellable>()
 
@@ -60,6 +62,7 @@ public class QuotaViewModel: ObservableObject {
                       DispatchQueue.main.async {
                           self.loadedQuota = nil
                           self.isLoading = false
+                          self.errorMessage = error.localizedDescription
                       }
                   }
               }
