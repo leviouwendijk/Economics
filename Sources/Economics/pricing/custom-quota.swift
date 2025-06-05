@@ -174,7 +174,7 @@ public struct CustomQuota: Sendable {
         let settings = """
         (base: \(base), kilometers: \(travelCost.kilometers))
 
-        \(t.string(for: tier, clientIdentifier: clientIdentifier))
+        \(t.string(for: tier))
         """
 
         str.append(settings)
@@ -204,17 +204,7 @@ public struct QuotaTierContent: Sendable {
         self.levels = levels
     }
 
-    public func string(for tier: QuotaTierType, clientIdentifier: String? = nil) -> String {
-        var str = ""
-
-        if let client = clientIdentifier {
-            str.append(client)
-            str.append("\n")
-            let div = String(repeating: "-", count: 35)
-            str.append(div)
-            str.append("\n")
-        }
-
+    public func string(for tier: QuotaTierType) -> String {
         let singularLocation = levels.singular.estimation.local == 1 ? "l" : "r"
 
         let settings = """
@@ -222,8 +212,6 @@ public struct QuotaTierContent: Sendable {
         suggestion: \(levels.suggestion.estimation.count) (r: \(levels.suggestion.estimation.remote), l: \(levels.suggestion.estimation.local))
         singular: (r/l: \(singularLocation))
         """
-
-        str.append(settings)
-        return str
+        return settings
     }
 }
