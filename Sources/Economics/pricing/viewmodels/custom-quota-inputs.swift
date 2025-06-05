@@ -136,15 +136,10 @@ public struct CustomQuotaInputs: Sendable {
         let sugg = try suggestion.sessionCountEstimation()
         let sing = try singular.sessionCountEstimation()
         let trav = try travelCost.travelCost()
-        // let esti = try SessionCountEstimation(
-        //     prognosis: prog,
-        //     suggestion: sugg
-        // )
 
         return try CustomQuota(
             base: ba,
             travelCost: trav,
-            // estimation: esti
             prognosis: prog,
             suggestion: sugg,
             singular: sing

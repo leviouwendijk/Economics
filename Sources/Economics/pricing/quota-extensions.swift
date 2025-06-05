@@ -45,9 +45,6 @@ extension QuotaTierContent {
 
         let prefix = "estimation"
 
-        // let progEst = levels.prognosis.estimation
-        // let suggEst = levels.suggestion.estimation
-
         let progCount = levels.prognosis.estimation.count.string()
         let progLocal = levels.prognosis.estimation.local.string()
 
@@ -161,12 +158,6 @@ extension QuotaTierContent {
                 replacement: singularLocationStrings.combined(),
                 initializer: .auto
             ),
-
-            // StringTemplateReplacement(
-            //     placeholders: ["session_locations"], // rename this / place this when local / remote?
-            //     replacement: " ",
-            //     initializer: .auto
-            // ),
         ]
     }
 }

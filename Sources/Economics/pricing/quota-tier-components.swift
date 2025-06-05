@@ -12,10 +12,6 @@ public struct QuotaRate: Sendable {
     public let cost: Double
     public let price: Double
 
-    // public var price: Double {
-    //     return base + cost
-    // }
-
     public init(
         base: Double,
         cost: Double,
@@ -111,65 +107,17 @@ public struct QuotaTierLevels: Sendable {
 }
 
 public struct QuotaTierLevelContent: Sendable {
-    // public let level: QuotaLevelType // .prognosis, .suggestion, .singular
     public let rate: QuotaRate
     public let estimation: SessionCountEstimationObject
 
     public init(
-        // level: QuotaLevelType,
         rate: QuotaRate,
         estimation: SessionCountEstimationObject
     ) {
-        // guard !(level == .singular && estimation.count > 1) else {
-        //     throw SessionCountEstimationError.singularExceedsOne(count: estimation.count)
-        // }
-        // self.level = level
         self.rate = rate
         self.estimation = estimation
     }
 }
-
-// extension Array where Element == QuotaTierLevel {
-    // public func missingCases() -> [QuotaLevelType] {
-    //     let foundSet = Set(self.map { $0.level })
-    //     let allSet   = Set(QuotaLevelType.allCases)
-    //     return Array<QuotaLevelType>(allSet.subtracting(foundSet))
-    // }
-
-    // public func containsAllCases() -> Bool {
-    //     return self.missingCases().isEmpty
-    // }
-
-    // public func meetInitializerRestriction(type restriction: SessionCountEstimationInitializerRestriction) throws {
-    //     if 
-    //         let sugg = self.first(where: { $0.level == .suggestion } ),
-    //         let prog = self.first(where: { $0.level == .prognosis } )
-    //     {
-    //         let suggCount = sugg.estimation.count // easier on memory to copy only two necessary ints once in scope?
-    //         let progCount = prog.estimation.count // or would it be easier not to copy but have to go search in the struct, (re?)loading the whole struct into memory?
-    //         if restriction == .equal {
-    //             guard !(suggCount > progCount) else {
-    //                 throw SessionCountEstimationError.suggestionExceedsPrognosis(
-    //                     prognosis: progCount,
-    //                     suggestion: suggCount
-    //                 )
-    //             }
-    //         } else {
-    //             guard progCount > suggCount else {
-    //                 throw SessionCountEstimationError.prognosisNotHigherThanSuggestion(
-    //                     prognosis: progCount,
-    //                     suggestion: suggCount
-    //                 )
-    //             }
-    //         }
-    //         return 
-    //     } else {
-    //         let m = self.missingCases() 
-    //         throw QuotaTierError.missingLevels(types: m)
-    //     }
-    // }
-// }
-// END OF NEW STRUCTS
 
 public enum SessionCountEstimationInitializerRestriction: Sendable {
     case lenient

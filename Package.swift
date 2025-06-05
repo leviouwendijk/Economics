@@ -28,9 +28,9 @@ let package = Package(
             dependencies: [
                 .product(name: "plate", package: "plate")
             ],
-            exclude: [
-                "pricing/old-custom-quote.swift.bak"
-            ]
+            // exclude: [
+            //     "pricing/old-custom-quote.swift.bak"
+            // ]
         ),
         .testTarget(
             name: "EconomicsTests",
