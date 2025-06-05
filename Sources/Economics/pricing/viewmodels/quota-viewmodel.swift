@@ -45,7 +45,7 @@ public class QuotaViewModel: ObservableObject {
         )
     
         $customQuotaInputs
-          .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+          .debounce(for: .milliseconds(800), scheduler: DispatchQueue.main)
           .sink { [weak self] inputs in
               guard let self = self else { return }
 
