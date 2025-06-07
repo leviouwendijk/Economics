@@ -46,3 +46,14 @@ public enum SessionCountEstimationError: Error, LocalizedError, Sendable {
         }
     }
 }
+
+public enum QuotaStringError: Error, LocalizedError, Sendable {
+    case quotaIsNil
+
+    public var errorDescription: String? {
+        switch self {
+        case .quotaIsNil:
+            return "Cannot get string because no quota has been loaded in QuotaViewModel"
+        }
+    }
+}
