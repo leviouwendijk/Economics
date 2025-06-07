@@ -119,17 +119,7 @@ public struct CustomQuota: Sendable {
         return contents
     }
 
-    public func inputs(for clientIdentifier: String? = nil) -> String {
-        var str = ""
-
-        if let client = clientIdentifier {
-            str.append(client)
-            str.append("\n")
-            let div = String(repeating: "-", count: 55)
-            str.append(div)
-            str.append("\n")
-        }
-
+    public func inputs() -> String {
         let settings = """
         kilometers: \(travelCost.kilometers)
             at:
@@ -154,38 +144,28 @@ public struct CustomQuota: Sendable {
                 local: \(singular.local)
         """
 
-        str.append(settings)
-        return str
+        return settings
     }
 
-    public func shortInputs(for tier: QuotaTierType, clientIdentifier: String? = nil) throws -> String {
-        var str = ""
-
-        if let client = clientIdentifier {
-            str.append(client)
-            str.append("\n")
-            let div = String(repeating: "-", count: 55)
-            str.append(div)
-            str.append("\n")
-        }
-
+    public func shortInputs(for tier: QuotaTierType) throws -> String {
         let t = try self.tier(being: tier)
 
         let settings = """
         (base: \(base), kilometers: \(travelCost.kilometers))
 
-        \(t.string(for: tier))
+        \(t.settingsString(for: tier))
+
+        \(t.priceString(for: tier))
         """
 
-        str.append(settings)
-        return str
+        return settings
     }
 
-    public func quotaSummary(clientIdentifier: String? = nil) throws -> String {
+    public func quotaSummary() throws -> String {
         let contents = try self.tiers()
 
         return """
-        \(self.inputs(for: clientIdentifier))
+        \(self.inputs())
 
         \(contents.table(by: .rate))
         """
@@ -204,14 +184,25 @@ public struct QuotaTierContent: Sendable {
         self.levels = levels
     }
 
-    public func string(for tier: QuotaTierType) -> String {
+    public func settingsString(for tier: QuotaTierType) -> String {
         let singularLocation = levels.singular.estimation.local == 1 ? "l" : "r"
 
         let settings = """
-        prognosis: \(levels.prognosis.estimation.count) (r: \(levels.prognosis.estimation.remote), l: \(levels.prognosis.estimation.local))
-        suggestion: \(levels.suggestion.estimation.count) (r: \(levels.suggestion.estimation.remote), l: \(levels.suggestion.estimation.local))
-        singular: (r/l: \(singularLocation))
+        for service:
+            prognosis: \(levels.prognosis.estimation.count) (r: \(levels.prognosis.estimation.remote), l: \(levels.prognosis.estimation.local))
+            suggestion: \(levels.suggestion.estimation.count) (r: \(levels.suggestion.estimation.remote), l: \(levels.suggestion.estimation.local))
+            singular: (r/l: \(singularLocation))
         """
         return settings
+    }
+
+    public func priceString(for tier: QuotaTierType) -> String {
+        let price = """
+        price:
+            prognosis: \(levels.prognosis.rate.price.rounded())
+            suggestion: \(levels.suggestion.rate.price.rounded()) 
+            singular: \(levels.singular.rate.price.rounded())
+        """
+        return price
     }
 }
