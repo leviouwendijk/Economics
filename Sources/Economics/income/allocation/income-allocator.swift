@@ -17,18 +17,36 @@ public struct IncomeAllocator {
         var steps: [IncomeAllocationEntry] = []
 
         for allocation in allocations {
-            let pct = allocation.percentage / 100
-            let principal = allocation.type == .relative ? remainder : income
-            let result = principal * pct
-            remainder -= result
+            if let percent = allocation.percentage {
+                let pct = percent / 100
+                let principal = allocation.type == .relative ? remainder : income
+                let result = principal * pct
 
-            let entry = IncomeAllocationEntry(
-                allocation: allocation,
-                principal: principal,
-                result: result,
-                remainder: remainder
-            )
-            steps.append(entry)
+                remainder -= result
+
+                let entry = IncomeAllocationEntry(
+                    allocation: allocation,
+                    principal: principal,
+                    result: result,
+                    remainder: remainder
+                )
+                steps.append(entry)
+            } else {
+                if let fixed = allocation.fixed {
+                    let principal = allocation.type == .relative ? remainder : income
+                    let result = principal - fixed
+
+                    remainder -= result
+
+                    let entry = IncomeAllocationEntry(
+                        allocation: allocation,
+                        principal: principal,
+                        result: result,
+                        remainder: remainder
+                    )
+                    steps.append(entry)
+                }
+            }
         }
         return IncomeAllocationSummary(income: income, entries: steps)
     }

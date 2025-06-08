@@ -15,11 +15,40 @@ public enum IncomeAllocationType: String, Codable {
     case relative
 }
 
+public enum IncomeAllocationError: Error, LocalizedError, Sendable {
+    case percentageAndFixedAreNil
+
+    public var errorDescription: String? {
+        switch self {
+        case .percentageAndFixedAreNil:
+            return "Either a percentage or fixed amount must be passed to intialize the IncomeAllocation object"
+        }
+    }
+}
+
 public struct IncomeAllocation: Codable, Equatable {
     public let account: IncomeAllocationAccount
     public let order: Int
-    public let percentage: Double   
+    public let percentage: Double?
+    public let fixed: Double?
     public let type: IncomeAllocationType     
+    
+    public init(
+        account: IncomeAllocationAccount,
+        order: Int,
+        percentage: Double? = nil,
+        fixed: Double? = nil,
+        type: IncomeAllocationType
+    ) throws {
+        guard !(percentage == nil && fixed == nil) else {
+            throw IncomeAllocationError.percentageAndFixedAreNil
+        }
+        self.account = account
+        self.order = order
+        self.percentage = percentage
+        self.fixed = fixed
+        self.type = type
+    }
 }
 
 public struct IncomeAllocationEntry: Codable, Equatable {
