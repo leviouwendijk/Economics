@@ -1,4 +1,5 @@
 import Foundation
+import plate
 
 public enum IncomeAllocationAccount: String, CaseIterable, Codable {
     case savings = "Savings"
@@ -73,5 +74,37 @@ public struct IncomeAllocationSummary: Codable, Equatable {
     }
     public var percentRemaining: Double {
         finalRemainder / income * 100
+    }
+
+    public func textReport(width: Int = 20) -> String {
+        var s = [String]()
+        s.append("")
+        s.append("Dividing income: \(income)")
+        s.append(String(repeating: "-", count: width))
+        s.append("")
+        for entry in entries {
+            s.append("Account: \(entry.allocation.account)")
+            s.append("    Order: \(entry.allocation.order)")
+            s.append("    Type: \(entry.allocation.type.rawValue)")
+            s.append(String(format: "    Split: %\(width).2f = %.2f%% of %.2f", entry.result, entry.allocation.percentage ?? "", entry.principal))
+            s.append("")
+        }
+        s.append(String(repeating: "=", count: width))
+        s.append(String(format: "Metrics for: %.2f", income))
+        s.append("")
+
+        let ratios: [(String, String)] = [
+            ("Total distributed", String(format: "EUR %.2f", totalDistributed)),
+            ("Remainder (Free Cash Flow)", String(format: "EUR %.2f", finalRemainder)),
+            ("Percent distributed", String(format: "%.2f%%", percentDistributed)),
+            ("Percent remaining", String(format: "%.2f%%", percentRemaining))
+        ]
+        s.append(contentsOf: ratios.aligned(char: "."))
+
+        s.append("(Note: new 'fixed' variables is not yet in print reports)")
+
+        s.append("")
+
+        return s.joined(separator: "\n")
     }
 }
