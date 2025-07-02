@@ -175,6 +175,22 @@ extension CustomQuota {
             ),
         ]
     }
+
+    public func expirationReplacements() -> [StringTemplateReplacement] {
+        return [
+            StringTemplateReplacement(
+                placeholders: ["start_date"], 
+                replacement: expiration.dates.start.formatted(),
+                initializer: .auto
+            ),
+            
+            StringTemplateReplacement(
+                placeholders: ["end_date"], 
+                replacement: expiration.dates.end.formatted(),
+                initializer: .auto
+            ),
+        ]
+    }
 }
 
 // extension QuotaTierContent {

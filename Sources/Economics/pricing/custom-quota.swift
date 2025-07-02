@@ -1,5 +1,6 @@
 import Foundation
 import plate
+import Structures
 
 public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable, Identifiable {
     case local
@@ -17,19 +18,22 @@ public struct CustomQuota: Sendable {
     public let prognosis: SessionCountEstimationObject
     public let suggestion: SessionCountEstimationObject
     public let singular: SessionCountEstimationObject
+    public let expiration: ExpirationSetting
 
     public init(
         base: Double = 350,
         travelCost: TravelCost,
         prognosis: SessionCountEstimationObject,
         suggestion: SessionCountEstimationObject,
-        singular: SessionCountEstimationObject
+        singular: SessionCountEstimationObject,
+        expiration: ExpirationSetting
     ) throws {
         self.base = base
         self.travelCost = travelCost
         self.prognosis = prognosis
         self.suggestion = suggestion
         self.singular = singular
+        self.expiration = expiration
     }
 
     public func cost(in tier: QuotaTierType, for level: QuotaLevelType) throws -> Double {
