@@ -24,42 +24,80 @@ public func standardVAT(_ country: StandardVAT) -> Double {
     return country.rate
 }
 
-public enum VAT {
+public enum VATInputValue {
+    case vat
+    case net
+    case gross
+}
+
+public enum VATResultValue {
     case vat
     case revenue
+    case receivable
 }
 
 public protocol ValueAddedTaxableDouble {
-    func vat(_ vatRate: Double, _ calculatedValue: VAT) -> Double
+    func vat(
+        _ rate: Double,
+        using input: VATInputValue,
+        returning result: VATResultValue
+    ) -> Double
 }
 
 public protocol ValueAddedTaxableInt {
-    func vat(_ vatRate: Double, _ calculatedValue: VAT) -> Int
+    func vat(
+        _ rate: Double,
+        using input: VATInputValue,
+        returning result: VATResultValue
+    ) -> Int
 }
 
 extension Double: ValueAddedTaxableDouble {
-    public func vat(_ vatRate: Double = standardVAT(.netherlands), _ calculatedValue: VAT = .vat) -> Double {
-        switch calculatedValue {
+    public func vat(
+        _ rate: Double = standardVAT(.netherlands),
+        using input: VATInputValue = .gross,
+        returning result: VATResultValue = .vat
+    ) -> Double {
+        let net: Double
+        let vat: Double
+        let gross: Double
+
+        switch input {
+        case .gross:
+            gross = self
+            net   = (self / (100.0 + rate)) * 100.0
+            vat   = (self / (100.0 + rate)) * rate
+
+        case .net:
+            net   = self
+            vat   = (net * rate) / 100.0
+            gross = net + vat
+
         case .vat:
-            return (self / (100.0 + vatRate)) * vatRate
+            vat   = self
+            net   = (vat / rate) * 100.0
+            gross = net + vat
+        }
+
+        switch result {
+        case .vat:
+            return vat
         case .revenue:
-            return (self / (100.0 + vatRate)) * 100.0
+            return net
+        case .receivable:
+            return gross
         }
     }
 }
 
 extension Int: ValueAddedTaxableInt {
-    public func vat(_ vatRate: Double = standardVAT(.netherlands), _ calculatedValue: VAT = .vat) -> Int {
+    public func vat(
+        _ rate: Double = standardVAT(.netherlands),
+        using input: VATInputValue = .gross,
+        returning result: VATResultValue = .vat
+    ) -> Int {
         let doubleValue = Double(self)
-        let result: Double
-        
-        switch calculatedValue {
-        case .vat:
-            result = (doubleValue / (100.0 + vatRate)) * vatRate
-        case .revenue:
-            result = (doubleValue / (100.0 + vatRate)) * 100.0
-        }
-        
-        return Int(result.rounded())
+        let computed = doubleValue.vat(rate, using: input, returning: result)
+        return Int(computed.rounded())
     }
 }
