@@ -1,4 +1,5 @@
 import Foundation
+import Extensions
 import plate
 
 public enum QuotaRateType: String, CaseIterable, Sendable {
@@ -80,23 +81,41 @@ public struct QuotaTierLevels: Sendable {
         return 
     }
 
-    public func viewableTuples(of rate: QuotaRateType) -> [(String, Double)] {
+    public func viewableTuples(
+        of rate: QuotaRateType,
+        displayPolicy: QuotaPriceDisplayPolicy = .raw
+    ) -> [(String, Double)] {
         switch rate {
-            case .price:
-            return [
-                ("prognosis", prognosis.rate.price),
-                ("suggestion", suggestion.rate.price),
-                ("singular", singular.rate.price)
-            ]
+        case .price:
+            switch displayPolicy {
+            case .raw:
+                return [
+                    ("prognosis", prognosis.rate.price),
+                    ("suggestion", suggestion.rate.price),
+                    ("singular", singular.rate.price)
+                ]
 
-            case .cost:
+                case let .rounded(multiple, direction, offset, _):
+                let pr = prognosis.rate.rounded(to: multiple, direction: direction, by: offset).price
+                let su = prognosis.rate.rounded(to: multiple, direction: direction, by: offset).price
+                let si = prognosis.rate.rounded(to: multiple, direction: direction, by: offset).price
+
+                return [
+                    // ("prognosis", (integer ? pr.integer() : pr )),
+                    ("prognosis", pr),
+                    ("suggestion", su),
+                    ("singular", si)
+                ]
+            }
+
+        case .cost:
             return [
                 ("prognosis", prognosis.rate.cost),
                 ("suggestion", suggestion.rate.cost),
                 ("singular", singular.rate.cost)
             ]
 
-            case .base:
+        case .base:
             return [
                 ("prognosis", prognosis.rate.base),
                 ("suggestion", suggestion.rate.base),
