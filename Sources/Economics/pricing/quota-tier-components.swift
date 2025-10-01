@@ -97,8 +97,8 @@ public struct QuotaTierLevels: Sendable {
 
                 case let .rounded(multiple, direction, offset, _):
                 let pr = prognosis.rate.rounded(to: multiple, direction: direction, by: offset).price
-                let su = prognosis.rate.rounded(to: multiple, direction: direction, by: offset).price
-                let si = prognosis.rate.rounded(to: multiple, direction: direction, by: offset).price
+                let su = suggestion.rate.rounded(to: multiple, direction: direction, by: offset).price
+                let si = singular.rate.rounded(to: multiple, direction: direction, by: offset).price
 
                 return [
                     // ("prognosis", (integer ? pr.integer() : pr )),
