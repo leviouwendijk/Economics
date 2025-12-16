@@ -1,6 +1,7 @@
 import Foundation
 import plate
-import Structures
+// import Structures // deprecating use of Structures.ExpirationSetting
+public typealias ExpirationSetting = plate.DateRange
 
 public enum QuotaTierType: String, CaseIterable, RawRepresentable, Sendable, Identifiable {
     case local

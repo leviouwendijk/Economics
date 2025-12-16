@@ -1,5 +1,5 @@
 import Foundation
-import Extensions
+// import Extensions
 import plate
 
 extension QuotaTierContent {
@@ -181,13 +181,15 @@ extension CustomQuota {
         return [
             StringTemplateReplacement(
                 placeholders: ["start_date"], 
-                replacement: expiration.dates.start.conforming(),
+                // replacement: expiration.dates.start.conforming(),
+                replacement: expiration.start.conforming(),
                 initializer: .auto
             ),
             
             StringTemplateReplacement(
                 placeholders: ["end_date"], 
-                replacement: expiration.dates.end.conforming(),
+                // replacement: expiration.dates.end.conforming(),
+                replacement: expiration.end.conforming(),
                 initializer: .auto
             ),
         ]
