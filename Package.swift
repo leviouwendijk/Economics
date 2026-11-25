@@ -20,11 +20,11 @@ let package = Package(
             branch: "master"
         ),
         // .package(
-        //     url: "https://github.com/leviouwendijk/Structures.git",
+        //     url: "https://github.com/swift-lco/Structures.git",
         //     branch: "master"
         // ),
         // .package(
-        //     url: "https://github.com/leviouwendijk/Extensions.git",
+        //     url: "https://github.com/swift-lco/Extensions.git",
         //     branch: "master"
         // ),
     ],
